@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "name": "augora-graphql-api",
+  "public": false,
+  "builds": [{ "src": "Handler/*.go", "use": "@now/go" }],
+  "regions": ["cdg1"],
+  "env": {
+    "backend_sql_user": "@backend_sql_user",
+    "backend_sql_password": "@backend_sql_password"
+  }
+}
