@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"time"
 
-	"github.com/KevinBacas/Gin-Go-Test/Models"
+	"github.com/Augora/Augora-GraphQL/Models"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mssql"
 	"github.com/samsarahq/thunder/graphql"
@@ -15,33 +14,21 @@ import (
 	"github.com/samsarahq/thunder/graphql/schemabuilder"
 )
 
-type post struct {
-	Title     string
-	Body      string
-	CreatedAt time.Time
-}
-
 // server is our graphql server.
 type server struct {
+	db *gorm.DB
 }
 
-var hidden_db *gorm.DB
-var isDBInitialized bool = false
-
 func GetDataBaseConnection() *gorm.DB {
-	if !isDBInitialized {
-		user := os.Getenv("backend_sql_user")
-		pass := os.Getenv("backend_sql_password")
-		db, err := gorm.Open("mssql", "sqlserver://"+user+":"+pass+"@augora.database.windows.net:1433?database=augora-db")
-		if err != nil {
-			fmt.Println(err)
-		}
-		db.LogMode(true)
-		hidden_db = db
-		isDBInitialized = true
+	user := os.Getenv("backend_sql_user")
+	pass := os.Getenv("backend_sql_password")
+	db, err := gorm.Open("mssql", "sqlserver://"+user+":"+pass+"@augora.database.windows.net:1433?database=augora-db")
+	if err != nil {
+		fmt.Println(err)
 	}
+	// db.LogMode(true)
 
-	return hidden_db
+	return db
 }
 
 // registerQuery registers the root query type.
@@ -49,26 +36,20 @@ func (s *server) registerQuery(schema *schemabuilder.Schema) {
 	obj := schema.Query()
 
 	obj.FieldFunc("Deputes", func() []Models.Depute {
-		db := GetDataBaseConnection()
-
 		var deputes []Models.Depute
-		db.Set("gorm:auto_preload", true).Find(&deputes)
+		s.db.Set("gorm:auto_preload", true).Find(&deputes)
 		return deputes
 	})
 
 	obj.FieldFunc("DeputesEnMandat", func(ctx context.Context) []Models.Depute {
-		db := GetDataBaseConnection()
-
 		var deputes []Models.Depute
-		db.Set("gorm:auto_preload", true).Where(&Models.Depute{EstEnMandat: true}).Find(&deputes)
+		s.db.Set("gorm:auto_preload", true).Where(&Models.Depute{EstEnMandat: true}).Find(&deputes)
 		return deputes
 	})
 
 	obj.FieldFunc("Depute", func(args struct{ Slug string }) Models.Depute {
-		db := GetDataBaseConnection()
-
 		var depute Models.Depute
-		db.Set("gorm:auto_preload", true).Where(&Models.Depute{Slug: args.Slug}).Find(&depute)
+		s.db.Set("gorm:auto_preload", true).Where(&Models.Depute{Slug: args.Slug}).Find(&depute)
 		return depute
 	})
 }
@@ -122,8 +103,12 @@ func GraphQLHTTPHandler(w http.ResponseWriter, r *http.Request) {
 	// Instantiate a server, build a server, and serve the schema on port 3030.
 	server := &server{}
 
+	// Init schemas
 	schema := server.schema()
 	introspection.AddIntrospectionToSchema(schema)
+
+	// Init Database connection
+	server.db = GetDataBaseConnection()
 
 	// Expose schema and graphiql.
 	hdl := graphql.HTTPHandler(schema)

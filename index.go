@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/KevinBacas/Gin-Go-Test/Models"
+	"github.com/Augora/Augora-GraphQL/Models"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mssql"
 )
@@ -30,7 +30,7 @@ func getDeputies() []Models.DeputeHandler {
 	json.NewDecoder(deputesEnMandatResp.Body).Decode(&deputesEnMandat)
 
 	for _, deputeEnMandat := range deputesEnMandat.Deputes {
-		for deputeIndex, _ := range deputes.Deputes {
+		for deputeIndex := range deputes.Deputes {
 			if deputes.Deputes[deputeIndex].Depute.Slug == deputeEnMandat.Depute.Slug {
 				deputes.Deputes[deputeIndex].Depute.EstEnMandat = true
 			}
