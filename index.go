@@ -3,10 +3,10 @@ package main
 import (
 	"net/http"
 
-	handler "github.com/Augora/Augora-GraphQL/Handler"
+	Handler "github.com/Augora/Augora-GraphQL/Handler"
 )
 
 func main() {
-	http.HandleFunc("/graphql", handler.GraphQLHTTPHandler)
+	http.HandleFunc("/graphql", Handler.GraphQLHTTPHandler)
 	http.ListenAndServe(":3030", nil)
 }
