@@ -5,7 +5,9 @@ go:
 
 deploy:
   provider: script
-  script: "npm i -g now && now --no-clipboard --token=$NOW_TOKEN"
+  script: "npm i -g now && now alias --token=$NOW_TOKEN $(now --no-clipboard --token=$NOW_TOKEN) api.augora.fr"
   on: 
     branch: master
     go: "1.12.7"
+notifications:
+  slack: augora:NbzHhCF6cj1DOJhe8lGOg5ih
