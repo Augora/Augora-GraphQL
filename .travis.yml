@@ -5,7 +5,7 @@ go:
 
 deploy:
   provider: script
-  script: "npm i -g now && now"
+  script: "npm i -g now && now --no-clipboard --token=$NOW_TOKEN"
   on: 
     branch: master
     go: "1.12.7"
