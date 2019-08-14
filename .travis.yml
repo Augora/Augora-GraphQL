@@ -4,10 +4,8 @@ go:
 - "1.12.7"
 
 deploy:
-  provider: scripts
-  scripts: 
-    - npm i -g now
-    - now
+  provider: script
+  script: "npm i -g now && now"
   on: 
     branch: master
     go: "1.12.7"
