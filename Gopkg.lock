@@ -78,6 +78,30 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:8ab7b86e7a65d0af9008be255d20648e4c65724c9486a16e766d58142fed3fd1"
+  name = "github.com/osteele/liquid"
+  packages = [
+    ".",
+    "expressions",
+    "filters",
+    "parser",
+    "render",
+    "tags",
+    "values",
+  ]
+  pruneopts = "UT"
+  revision = "e0ae1590bfe2584ce1146f3238f0a4f055b7fd3f"
+  version = "v1.2.4"
+
+[[projects]]
+  digest = "1:914ebae4a550d3979fa366abba0762341e8f31bb94aa2d0980c8ea58f00ee2f2"
+  name = "github.com/osteele/tuesday"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "4f30e814e39a8c811712a37dc9cc9f51cdb17b7c"
+  version = "v1.0.3"
+
+[[projects]]
   digest = "1:0734027cf0eb9c4c15942a473cc10db0a2bbb99e6533a3bdc71a1b16642f3e2f"
   name = "github.com/samsarahq/go"
   packages = ["oops"]
@@ -119,12 +143,21 @@
   pruneopts = "UT"
   revision = "112230192c580c3556b8cee6403af37a4fc5f28c"
 
+[[projects]]
+  digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
+  version = "v2.2.2"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/jinzhu/gorm",
     "github.com/jinzhu/gorm/dialects/mssql",
+    "github.com/osteele/liquid",
     "github.com/samsarahq/thunder/graphql",
     "github.com/samsarahq/thunder/graphql/introspection",
     "github.com/samsarahq/thunder/graphql/schemabuilder",

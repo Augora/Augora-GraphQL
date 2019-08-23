@@ -3,25 +3,32 @@ package Importers
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
+	"github.com/Augora/Augora-GraphQL/Maps"
 	"github.com/Augora/Augora-GraphQL/Models"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mssql"
 )
 
 func getDeputies() []Models.DeputeHandler {
+	log.Println("Getting deputies...")
 	deputesResp, err := http.Get("https://www.nosdeputes.fr/deputes/json")
 	if err != nil {
 		log.Fatalln(err)
 	}
+	log.Println("Deputies received!")
 
+	log.Println("Getting in office...")
 	deputesEnMandatResp, err := http.Get("https://www.nosdeputes.fr/deputes/enmandat/json")
 	if err != nil {
 		log.Fatalln(err)
 	}
+	log.Println("Deputies in office received!")
 
 	var deputes Models.Deputes
 	json.NewDecoder(deputesResp.Body).Decode(&deputes)
@@ -29,8 +36,12 @@ func getDeputies() []Models.DeputeHandler {
 	var deputesEnMandat Models.Deputes
 	json.NewDecoder(deputesEnMandatResp.Body).Decode(&deputesEnMandat)
 
-	for _, deputeEnMandat := range deputesEnMandat.Deputes {
-		for deputeIndex := range deputes.Deputes {
+	for deputeIndex := range deputes.Deputes {
+		log.Println("Getting " + deputes.Deputes[deputeIndex].Depute.Slug + " activities...")
+		activities := getDeputyActivities(deputes.Deputes[deputeIndex].Depute.Slug)
+		deputes.Deputes[deputeIndex].Depute.Activites = activities
+		log.Println(deputes.Deputes[deputeIndex].Depute.Slug + " received!")
+		for _, deputeEnMandat := range deputesEnMandat.Deputes {
 			if deputes.Deputes[deputeIndex].Depute.Slug == deputeEnMandat.Depute.Slug {
 				deputes.Deputes[deputeIndex].Depute.EstEnMandat = true
 			}
@@ -38,6 +49,27 @@ func getDeputies() []Models.DeputeHandler {
 	}
 
 	return deputes.Deputes
+}
+
+func getDeputyActivities(slug string) []Models.Activity {
+	activitesResp, err := http.Get("https://www.nosdeputes.fr/" + slug + "/graphes/lastyear/total?questions=true&format=json")
+	if err != nil {
+		log.Println(err)
+	}
+
+	bodyBytes, err := ioutil.ReadAll(activitesResp.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var activitesFromAPI map[string]interface{}
+	json.Unmarshal(bodyBytes, &activitesFromAPI)
+	mappedActivities := Maps.MapActivities(activitesFromAPI)
+
+	var activities []Models.Activity
+	json.NewDecoder(strings.NewReader(mappedActivities)).Decode(&activities)
+
+	return activities
 }
 
 func ImportDeputies() {
@@ -55,6 +87,7 @@ func ImportDeputies() {
 	db.AutoMigrate(&Models.Email{})
 	db.AutoMigrate(&Models.Adresse{})
 	db.AutoMigrate(&Models.Collaborateur{})
+	db.AutoMigrate(&Models.Activity{})
 
 	// Begin transation
 	tx := db.Begin()
@@ -65,6 +98,7 @@ func ImportDeputies() {
 	tx.Unscoped().Delete(&Models.Email{})
 	tx.Unscoped().Delete(&Models.Adresse{})
 	tx.Unscoped().Delete(&Models.Collaborateur{})
+	tx.Unscoped().Delete(&Models.Activity{})
 
 	// Inserting deputes
 	for _, depute := range getDeputies() {
