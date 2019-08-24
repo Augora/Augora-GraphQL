@@ -16,7 +16,6 @@ import (
 
 // server is our graphql server.
 type server struct {
-	db *gorm.DB
 }
 
 func GetDataBaseConnection() *gorm.DB {
@@ -26,7 +25,7 @@ func GetDataBaseConnection() *gorm.DB {
 	if err != nil {
 		fmt.Println(err)
 	}
-	// db.LogMode(true)
+	db.LogMode(true)
 
 	return db
 }
@@ -37,20 +36,33 @@ func (s *server) registerQuery(schema *schemabuilder.Schema) {
 
 	obj.FieldFunc("Deputes", func() []Models.Depute {
 		var deputes []Models.Depute
-		s.db.Set("gorm:auto_preload", true).Find(&deputes)
+		db := GetDataBaseConnection()
+		defer db.Close()
+		db.Set("gorm:auto_preload", true).Find(&deputes)
 		return deputes
 	})
 
 	obj.FieldFunc("DeputesEnMandat", func(ctx context.Context) []Models.Depute {
 		var deputes []Models.Depute
-		s.db.Set("gorm:auto_preload", true).Where(&Models.Depute{EstEnMandat: true}).Find(&deputes)
+		db := GetDataBaseConnection()
+		defer db.Close()
+		db.Set("gorm:auto_preload", true).Where(&Models.Depute{EstEnMandat: true}).Find(&deputes)
 		return deputes
 	})
 
 	obj.FieldFunc("Depute", func(args struct{ Slug string }) Models.Depute {
 		var depute Models.Depute
-		s.db.Set("gorm:auto_preload", true).Where(&Models.Depute{Slug: args.Slug}).Find(&depute)
+		db := GetDataBaseConnection()
+		defer db.Close()
+		db.Set("gorm:auto_preload", true).Where(&Models.Depute{Slug: args.Slug}).Find(&depute)
 		return depute
+	})
+}
+
+func (s *server) registerMutation(schema *schemabuilder.Schema) {
+	obj := schema.Mutation()
+	obj.FieldFunc("ping", func(args struct{ Message string }) string {
+		return args.Message
 	})
 }
 
@@ -96,6 +108,7 @@ func (s *server) schema() *graphql.Schema {
 	builder := schemabuilder.NewSchema()
 	s.registerDepute(builder)
 	s.registerQuery(builder)
+	s.registerMutation(builder)
 	return builder.MustBuild()
 }
 
@@ -106,9 +119,6 @@ func GraphQLHTTPHandler(w http.ResponseWriter, r *http.Request) {
 	// Init schemas
 	schema := server.schema()
 	introspection.AddIntrospectionToSchema(schema)
-
-	// Init Database connection
-	server.db = GetDataBaseConnection()
 
 	// Expose schema and graphiql.
 	hdl := graphql.HTTPHandler(schema)
