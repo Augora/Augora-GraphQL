@@ -2,7 +2,6 @@ package Handler
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/Augora/Augora-GraphQL/Models"
