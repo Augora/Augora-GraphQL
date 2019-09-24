@@ -6,13 +6,11 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/Augora/Augora-GraphQL/Maps"
 	"github.com/Augora/Augora-GraphQL/Models"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mssql"
+	"github.com/Augora/Augora-GraphQL/Utils"
 )
 
 func getDeputies() []Models.DeputeHandler {
@@ -73,13 +71,7 @@ func getDeputyActivities(slug string) []Models.Activity {
 }
 
 func ImportDeputies() {
-	user := os.Getenv("backend_sql_user")
-	pass := os.Getenv("backend_sql_password")
-	db, err := gorm.Open("mssql", "sqlserver://"+user+":"+pass+"@augora.database.windows.net:1433?database=augora-db")
-	if err != nil {
-		fmt.Println(err)
-	}
-	db.LogMode(true)
+	db := Utils.GetDataBaseConnection()
 
 	// Loading database models
 	db.AutoMigrate(&Models.Depute{})
