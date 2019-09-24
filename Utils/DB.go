@@ -1,6 +1,7 @@
 package Utils
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/jinzhu/gorm"
