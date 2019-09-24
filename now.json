@@ -1,11 +1,17 @@
 {
   "version": 2,
-  "name": "augora-graphql-api",
+  "name": "Augora-GraphQL",
   "public": false,
-  "builds": [{ "src": "Handler/*.go", "use": "@now/go" }],
+  "builds": [{ "src": "Handler/**/*.go", "use": "@now/go" }],
   "regions": ["cdg1"],
   "env": {
     "backend_sql_user": "@backend_sql_user",
     "backend_sql_password": "@backend_sql_password"
-  }
+  },
+  "routes": [
+    { "src": "/ping", "dest": "Handler/Rest/Ping.go" },
+    { "src": "/graphql", "dest": "Handler/graphql.go" },
+    { "src": "/deputesenmandat", "dest": "Handler/Rest/DeputiesInOffice.go" },
+    { "src": "/deputes", "dest": "Handler/Rest/Deputies.go" }
+  ]
 }

@@ -18,7 +18,7 @@ type Site struct {
 
 type Email struct {
 	gorm.Model
-	AmailRefer uint
+	EmailRefer uint
 	Email      string `json:"email"`
 }
 

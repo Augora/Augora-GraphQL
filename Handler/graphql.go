@@ -14,7 +14,6 @@ import (
 	"github.com/samsarahq/thunder/graphql/schemabuilder"
 )
 
-// server is our graphql server.
 type server struct {
 }
 
@@ -30,7 +29,6 @@ func GetDataBaseConnection() *gorm.DB {
 	return db
 }
 
-// registerQuery registers the root query type.
 func (s *server) registerQuery(schema *schemabuilder.Schema) {
 	obj := schema.Query()
 
@@ -42,7 +40,7 @@ func (s *server) registerQuery(schema *schemabuilder.Schema) {
 		return deputes
 	})
 
-	obj.FieldFunc("DeputesEnMandat", func(ctx context.Context) []Models.Depute {
+	obj.FieldFunc("DeputesEnMandat", func() []Models.Depute {
 		var deputes []Models.Depute
 		db := GetDataBaseConnection()
 		defer db.Close()

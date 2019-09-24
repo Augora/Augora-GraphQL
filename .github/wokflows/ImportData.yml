@@ -1,0 +1,44 @@
+name: ImportData
+on:
+  schedule:
+    - cron: 0 6 * * *
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.12
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.12
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+
+      - name: Get dependencies
+        run: |
+          go get -v -t -d ./...
+          if [ -f Gopkg.toml ]; then
+              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+              dep ensure
+          fi
+
+      - name: Build
+        run: go build -v .
+
+      - name: Run import
+        run: go run index.go
+        env:
+          IMPORT: "True"
+          BACKEND_SQL_USER: ${{ secrets.BACKEND_SQL_USER }}
+          BACKEND_SQL_PASSWORD: ${{ secrets.BACKEND_SQL_PASSWORD }}
+
+      - uses: 8398a7/action-slack@v2
+        with:
+          status: ${{ job.status }}
+          author_name: Deployment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()
