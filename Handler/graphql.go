@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/Augora/Augora-GraphQL/Models"
 	"github.com/Augora/Augora-GraphQL/Utils"
