@@ -15,7 +15,7 @@ func DeputiesInOfficeHandler(w http.ResponseWriter, r *http.Request) {
 	db := Utils.GetDataBaseConnection()
 
 	var deputes []Models.Depute
-	db.Preload("sites").Preload("emails").Preload("adresses").Preload("collaborateurs").Where(&Models.Depute{EstEnMandat: true}).Find(&deputes)
+	db.Preload("SitesWeb").Preload("Emails").Preload("Adresses").Preload("Collaborateurs").Where(&Models.Depute{EstEnMandat: true}).Find(&deputes)
 	res, _ := json.Marshal(deputes)
 	fmt.Fprintf(w, string(res))
 }

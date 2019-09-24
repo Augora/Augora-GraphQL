@@ -83,8 +83,8 @@ type Depute struct {
 	Emails         []Email         `json:"emails" gorm:"foreignkey:EmailRefer"`
 	Adresses       []Adresse       `json:"adresses" gorm:"foreignkey:AdresseRefer"`
 	Collaborateurs []Collaborateur `json:"collaborateurs" gorm:"foreignkey:CollaborateurRefer"`
-	Activites      []Activity      `gorm:"foreignkey:ActivityRefer"`
+	Activites      []Activity      `gorm:"foreignkey:ActivityRefer" json:"-"`
 
 	// Custom fields
-	EstEnMandat bool
+	EstEnMandat bool `json:"-"`
 }

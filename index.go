@@ -1,11 +1,12 @@
 package main
 
 import (
+	"net/http"
+	"os"
+
 	"github.com/Augora/Augora-GraphQL/Handler"
 	"github.com/Augora/Augora-GraphQL/Handler/Rest"
 	"github.com/Augora/Augora-GraphQL/Importers"
-	"net/http"
-	"os"
 )
 
 func main() {
@@ -14,8 +15,8 @@ func main() {
 		Importers.ImportFiles()
 	} else {
 		http.HandleFunc("/graphql", Handler.GraphQLHTTPHandler)
-		http.HandleFunc("/deputes", Rest.Deputies)
-		http.HandleFunc("/deputesenmandat", Rest.DeputiesInOffice)
+		http.HandleFunc("/deputes", Rest.DeputiesHandler)
+		http.HandleFunc("/deputesenmandat", Rest.DeputiesInOfficeHandler)
 		http.ListenAndServe(":3030", nil)
 	}
 }
