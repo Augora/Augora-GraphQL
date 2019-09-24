@@ -11,26 +11,26 @@ type Deputes struct {
 }
 
 type Site struct {
-	gorm.Model
-	SiteRefer uint
-	Site      string `json:"site"`
+	gorm.Model `json:"-"`
+	SiteRefer  uint   `json:"-"`
+	Site       string `json:"site"`
 }
 
 type Email struct {
-	gorm.Model
-	EmailRefer uint
+	gorm.Model `json:"-"`
+	EmailRefer uint   `json:"-"`
 	Email      string `json:"email"`
 }
 
 type Adresse struct {
-	gorm.Model
-	AdresseRefer uint
+	gorm.Model   `json:"-"`
+	AdresseRefer uint   `json:"-"`
 	Adresse      string `json:"adresse"`
 }
 
 type Collaborateur struct {
-	gorm.Model
-	CollaborateurRefer uint
+	gorm.Model         `json:"-"`
+	CollaborateurRefer uint   `json:"-"`
 	Collaborateur      string `json:"collaborateur"`
 }
 
@@ -39,8 +39,8 @@ type DeputeHandler struct {
 }
 
 type Activity struct {
-	gorm.Model
-	ActivityRefer            uint
+	gorm.Model               `json:"-"`
+	ActivityRefer            uint `json:"-"`
 	StartDate                *time.Time
 	EndDate                  *time.Time
 	PresencesCommission      uint `json:"presencesCommission"`
@@ -52,7 +52,7 @@ type Activity struct {
 }
 
 type Depute struct {
-	gorm.Model
+	gorm.Model `json:"-"`
 
 	// Fields from API
 	IDFromAPI          uint   `json:"id"`

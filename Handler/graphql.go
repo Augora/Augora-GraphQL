@@ -7,8 +7,7 @@ import (
 	"os"
 
 	"github.com/Augora/Augora-GraphQL/Models"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mssql"
+	"github.com/Augora/Augora-GraphQL/Utils"
 	"github.com/samsarahq/thunder/graphql"
 	"github.com/samsarahq/thunder/graphql/introspection"
 	"github.com/samsarahq/thunder/graphql/schemabuilder"
@@ -17,24 +16,12 @@ import (
 type server struct {
 }
 
-func GetDataBaseConnection() *gorm.DB {
-	user := os.Getenv("backend_sql_user")
-	pass := os.Getenv("backend_sql_password")
-	db, err := gorm.Open("mssql", "sqlserver://"+user+":"+pass+"@augora.database.windows.net:1433?database=augora-db")
-	if err != nil {
-		fmt.Println(err)
-	}
-	db.LogMode(true)
-
-	return db
-}
-
 func (s *server) registerQuery(schema *schemabuilder.Schema) {
 	obj := schema.Query()
 
 	obj.FieldFunc("Deputes", func() []Models.Depute {
 		var deputes []Models.Depute
-		db := GetDataBaseConnection()
+		db := Utils.GetDataBaseConnection()
 		defer db.Close()
 		db.Set("gorm:auto_preload", true).Find(&deputes)
 		return deputes
@@ -42,7 +29,7 @@ func (s *server) registerQuery(schema *schemabuilder.Schema) {
 
 	obj.FieldFunc("DeputesEnMandat", func() []Models.Depute {
 		var deputes []Models.Depute
-		db := GetDataBaseConnection()
+		db := Utils.GetDataBaseConnection()
 		defer db.Close()
 		db.Set("gorm:auto_preload", true).Where(&Models.Depute{EstEnMandat: true}).Find(&deputes)
 		return deputes
@@ -50,7 +37,7 @@ func (s *server) registerQuery(schema *schemabuilder.Schema) {
 
 	obj.FieldFunc("Depute", func(args struct{ Slug string }) Models.Depute {
 		var depute Models.Depute
-		db := GetDataBaseConnection()
+		db := Utils.GetDataBaseConnection()
 		defer db.Close()
 		db.Set("gorm:auto_preload", true).Where(&Models.Depute{Slug: args.Slug}).Find(&depute)
 		return depute
