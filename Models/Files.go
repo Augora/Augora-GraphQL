@@ -11,7 +11,7 @@ type DossierHandler struct {
 }
 
 type Dossier struct {
-	gorm.Model
+	gorm.Model           `json:"-"`
 	IDFromAPI            uint   `json:"id"`
 	IDDossierInstitution string `json:"id_dossier_institution"`
 	Titre                string `json:"titre"`
