@@ -15,7 +15,7 @@ func DeputyHandler(w http.ResponseWriter, r *http.Request) {
 	db := Utils.GetDataBaseConnection()
 
 	var depute Models.Depute
-	slug := r.URL.Query()["slug"]
+	slug := r.URL.Query()["slug"][0]
 	db.Preload("SitesWeb").Preload("Emails").Preload("Adresses").Preload("Collaborateurs").Where(&Models.Depute{Slug: slug}).Find(&depute)
 	res, _ := json.Marshal(depute)
 	fmt.Fprintf(w, string(res))
