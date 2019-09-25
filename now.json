@@ -5,8 +5,8 @@
   "builds": [{ "src": "Handler/**/*.go", "use": "@now/go" }],
   "regions": ["cdg1"],
   "env": {
-    "backend_sql_user": "@backend_sql_user",
-    "backend_sql_password": "@backend_sql_password"
+    "BACKEND_SQL_USER": "@backend_sql_user",
+    "BACKEND_SQL_PASSWORD": "@backend_sql_password"
   },
   "routes": [
     { "src": "/ping", "dest": "Handler/Rest/Ping.go" },
