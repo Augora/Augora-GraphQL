@@ -11,7 +11,8 @@ import (
 func GetDataBaseConnection() *gorm.DB {
 	user := os.Getenv("BACKEND_SQL_USER")
 	pass := os.Getenv("BACKEND_SQL_PASSWORD")
-	db, err := gorm.Open("mssql", "sqlserver://"+user+":"+pass+"@augora.database.windows.net:1433?database=augora-db")
+	database := os.Getenv("BACKEND_SQL_DATABASE")
+	db, err := gorm.Open("mssql", "sqlserver://"+user+":"+pass+"@augora.database.windows.net:1433?database="+database)
 	if err != nil {
 		fmt.Println(err)
 	}

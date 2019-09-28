@@ -1,16 +1,17 @@
-name: ImportData
+name: Import data in sandbox
 on:
   schedule:
     - cron: "0 4 * * *"
+
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.12
+      - name: Set up Go 1.13
         uses: actions/setup-go@v1
         with:
-          go-version: 1.12
+          go-version: 1.13
         id: go
 
       - name: Check out code into the Go module directory
@@ -33,10 +34,11 @@ jobs:
           IMPORT: "True"
           BACKEND_SQL_USER: ${{ secrets.BACKEND_SQL_USER }}
           BACKEND_SQL_PASSWORD: ${{ secrets.BACKEND_SQL_PASSWORD }}
+          BACKEND_SQL_DATABASE: "sandbox-db"
 
       - name: Notify slack
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         uses: pullreminders/slack-action@master
         with:
-          args: '{\"channel\":\"C4H19LCN9\",\"text\":\"Data successfully imported in production :sunglasses::tada:\"}'
+          args: '{\"channel\":\"C4H19LCN9\",\"text\":\"Data successfully imported in sandbox :sunglasses::tada:\"}'

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/Augora/Augora-GraphQL/Maps"
@@ -33,6 +34,11 @@ func getDeputies() []Models.DeputeHandler {
 
 	var deputesEnMandat Models.Deputes
 	json.NewDecoder(deputesEnMandatResp.Body).Decode(&deputesEnMandat)
+
+	database := os.Getenv("BACKEND_SQL_DATABASE")
+	if database == "sandbox-db" {
+		deputes.Deputes = deputes.Deputes[:20]
+	}
 
 	for deputeIndex := range deputes.Deputes {
 		log.Println("Getting " + deputes.Deputes[deputeIndex].Depute.Slug + " activities...")
