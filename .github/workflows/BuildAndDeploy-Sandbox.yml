@@ -39,7 +39,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Now
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+
+        - name: Deploy to Now
         uses: mikeal/npx@master
         env:
           ZEIT_TOKEN: ${{ secrets.ZEIT_TOKEN }}

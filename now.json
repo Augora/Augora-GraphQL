@@ -1,7 +1,8 @@
 {
   "version": 2,
-  "name": "Augora-GraphQL",
+  "name": "Augora-API",
   "public": false,
+  "scope": "augora",
   "builds": [
     {
       "src": "Handler/**/*.go",
