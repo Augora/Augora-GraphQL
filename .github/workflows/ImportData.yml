@@ -1,7 +1,7 @@
 name: ImportData
 on:
   schedule:
-    - cron: "0 6 * * *"
+    - cron: "0 4 * * *"
 jobs:
   build:
     name: Build
@@ -34,11 +34,9 @@ jobs:
           BACKEND_SQL_USER: ${{ secrets.BACKEND_SQL_USER }}
           BACKEND_SQL_PASSWORD: ${{ secrets.BACKEND_SQL_PASSWORD }}
 
-      - uses: 8398a7/action-slack@v2
-        with:
-          status: ${{ job.status }}
-          author_name: Deployment
+      - name: Notify slack
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: always()
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"C4H19LCN9\",\"text\":\"Data successfully imported in production. :sunglasses::tada:\"}'
