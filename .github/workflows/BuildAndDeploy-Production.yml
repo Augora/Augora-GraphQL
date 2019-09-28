@@ -39,8 +39,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v1
+      - uses: actions/checkout@v1
 
       - name: Deploy to Now
         uses: mikeal/npx@master
