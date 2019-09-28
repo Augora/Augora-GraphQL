@@ -1,7 +1,11 @@
-name: CI
-on: [push]
-jobs:
+name: CI/CD Sandbox
 
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -29,3 +33,22 @@ jobs:
 
     - name: Build
       run: go build -v .
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Now
+        uses: mikeal/npx@master
+        env:
+          ZEIT_TOKEN: ${{ secrets.ZEIT_TOKEN }}
+        with:
+          args: "now alias --token=$ZEIT_TOKEN $(now --no-clipboard --token=$ZEIT_TOKEN --public) sandbox.augora.fr"
+
+      - name: Notify slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"C4H19LCN9\",\"text\":\"Sandbox API successfully deployed :rocket:\"}'
