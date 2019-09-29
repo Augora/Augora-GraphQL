@@ -15,7 +15,7 @@
   "env": {
     "BACKEND_SQL_USER": "@backend_sql_user",
     "BACKEND_SQL_PASSWORD": "@backend_sql_password",
-    "BACKEND_SQL_DATABSE": "@backend_sql_database"
+    "BACKEND_SQL_DATABASE": "@backend_sql_database"
   },
   "routes": [
     {
