@@ -1,11 +1,13 @@
 [
   {% for week in (1..53) %}
-    {% capture weekAsString %}{{ week }}{% endcapture  %}
+    {% capture weekAsString %}
+      {{ week }}
+    {% endcapture %}
     {
       "weekNumber": {{ week }},
       "presencesCommission": {{ n_presences.commission[weekAsString] }},
       "presencesHemicycle": {{ n_presences.hemicycle[weekAsString] }},
-      "participationsCommission": {{ n_participations.hemicycle[weekAsString] }},
+      "participationsCommission": { n_participations.hemicycle[weekAsString] }},
       "participationsHemicycle": {{ n_participations.hemicycle[weekAsString] }},
       "questions": {{ n_questions[weekAsString] }},
       "vacances": {{ vacances[weekAsString] }}

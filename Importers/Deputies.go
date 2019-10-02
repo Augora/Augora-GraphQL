@@ -85,6 +85,8 @@ func ImportDeputies() {
 	db.AutoMigrate(&Models.Email{})
 	db.AutoMigrate(&Models.Adresse{})
 	db.AutoMigrate(&Models.Collaborateur{})
+	db.AutoMigrate(&Models.AncienMandat{})
+	db.AutoMigrate(&Models.AutreMandat{})
 	db.AutoMigrate(&Models.Activity{})
 
 	// Begin transation

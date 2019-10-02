@@ -28,6 +28,18 @@ type Adresse struct {
 	Adresse      string `json:"adresse"`
 }
 
+type AncienMandat struct {
+	gorm.Model        `json:"-"`
+	AncienMandatRefer uint   `json:"-"`
+	AncienMandat      string `json:"mandat"`
+}
+
+type AutreMandat struct {
+	gorm.Model       `json:"-"`
+	AutreMandatRefer uint   `json:"-"`
+	AutreMandat      string `json:"mandat"`
+}
+
 type Collaborateur struct {
 	gorm.Model         `json:"-"`
 	CollaborateurRefer uint   `json:"-"`
@@ -84,6 +96,8 @@ type Depute struct {
 	Adresses       []Adresse       `json:"adresses" gorm:"foreignkey:AdresseRefer"`
 	Collaborateurs []Collaborateur `json:"collaborateurs" gorm:"foreignkey:CollaborateurRefer"`
 	Activites      []Activity      `gorm:"foreignkey:ActivityRefer" json:"-"`
+	AnciensMandats []AncienMandat  `json:"anciens_mandats" gorm:"foreignkey:AncienMandatRefer"`
+	AutresMandats  []AutreMandat   `json:"autres_mandats" gorm:"foreignkey:AutreMandatRefer"`
 
 	// Custom fields
 	EstEnMandat bool `json:"-"`
