@@ -9,6 +9,7 @@ require (
 	github.com/jinzhu/gorm v1.9.10
 	github.com/osteele/liquid v1.2.4
 	github.com/osteele/tuesday v1.0.3 // indirect
+	github.com/r3labs/diff v0.0.0-20190801153147-a71de73c46ad
 	github.com/samsarahq/go v0.0.0-20190905175208-8d057fd44004 // indirect
 	github.com/samsarahq/thunder v0.5.0
 )

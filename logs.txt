@@ -1,0 +1,44 @@
+
+[35m(/Users/kevinbacas/git/Augora-GraphQL/Importers/Deputies.go:101)[0m 
+[33m[2019-10-02 11:06:00][0m  [36;1m[36.41ms][0m  SELECT * FROM [deputes]  WHERE [deputes].[deleted_at] IS NULL  
+[36;31m[20 rows affected or returned ][0m 
+
+[35m(/Users/kevinbacas/git/Augora-GraphQL/Importers/Deputies.go:101)[0m 
+[33m[2019-10-02 11:06:00][0m  [36;1m[30.02ms][0m  SELECT * FROM [sites]  WHERE [sites].[deleted_at] IS NULL AND (([site_refer] IN (81,83,89,90,91,99,97,98,82,84,85,86,88,93,94,87,92,95,96,100)))  
+[36;31m[58 rows affected or returned ][0m 
+
+[35m(/Users/kevinbacas/git/Augora-GraphQL/Importers/Deputies.go:101)[0m 
+[33m[2019-10-02 11:06:00][0m  [36;1m[29.93ms][0m  SELECT * FROM [emails]  WHERE [emails].[deleted_at] IS NULL AND (([email_refer] IN (84,87,91,98,99,85,90,92,95,96,93,94,100,81,82,83,86,89,88,97)))  
+[36;31m[26 rows affected or returned ][0m 
+
+[35m(/Users/kevinbacas/git/Augora-GraphQL/Importers/Deputies.go:101)[0m 
+[33m[2019-10-02 11:06:01][0m  [36;1m[29.17ms][0m  SELECT * FROM [adresses]  WHERE [adresses].[deleted_at] IS NULL AND (([adresse_refer] IN (95,93,83,86,90,92,94,98,81,87,91,96,99,84,85,88,89,97,100,82)))  
+[36;31m[32 rows affected or returned ][0m 
+
+[35m(/Users/kevinbacas/git/Augora-GraphQL/Importers/Deputies.go:101)[0m 
+[33m[2019-10-02 11:06:01][0m  [36;1m[30.36ms][0m  SELECT * FROM [collaborateurs]  WHERE [collaborateurs].[deleted_at] IS NULL AND (([collaborateur_refer] IN (82,84,90,92,94,97,91,98,81,85,87,89,95,96,100,83,86,88,93,99)))  
+[36;31m[66 rows affected or returned ][0m 
+
+[35m(/Users/kevinbacas/git/Augora-GraphQL/Importers/Deputies.go:101)[0m 
+[33m[2019-10-02 11:06:01][0m  [36;1m[81.54ms][0m  SELECT * FROM [activities]  WHERE [activities].[deleted_at] IS NULL AND (([activity_refer] IN (90,91,93,94,99,82,84,85,87,100,81,97,98,86,88,89,92,95,96,83)))  
+[36;31m[1007 rows affected or returned ][0m 
+[
+  {
+    "type": "update",
+    "path": [
+      "0",
+      "GroupeSigle"
+    ],
+    "from": "LREM",
+    "to": "LEL"
+  },
+  {
+    "type": "create",
+    "path": [
+      "20",
+      "Slug"
+    ],
+    "from": null,
+    "to": "mdr"
+  }
+]
