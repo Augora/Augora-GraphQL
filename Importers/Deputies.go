@@ -98,6 +98,8 @@ func ImportDeputies() {
 	tx.Unscoped().Delete(&Models.Email{})
 	tx.Unscoped().Delete(&Models.Adresse{})
 	tx.Unscoped().Delete(&Models.Collaborateur{})
+	tx.Unscoped().Delete(&Models.AncienMandat{})
+	tx.Unscoped().Delete(&Models.AutreMandat{})
 	tx.Unscoped().Delete(&Models.Activity{})
 
 	// Inserting deputes
