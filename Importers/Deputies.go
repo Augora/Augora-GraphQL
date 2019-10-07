@@ -140,17 +140,27 @@ func ImportDeputies() {
 
 	// Inserting deputes
 	changelog, _ := diff.Diff(deputiesInDB, deputies)
+	groupedDiff := make(map[string]diff.Changelog)
 	for _, change := range changelog {
-		if change.Type == "update" {
-			deputyIndex, _ := strconv.Atoi(change.Path[0])
-			currentDeputy := deputiesInDB[deputyIndex]
-			setField(currentDeputy, change.Path[1], change.To.(string))
-		}
+		groupedDiff[change.Path[0]] = append(groupedDiff[change.Path[0]], change)
 	}
-	jsonContent, _ := json.MarshalIndent(changelog, "", "  ")
+
+	for i, changedGroup := range groupedDiff {
+		deputyIndex, _ := strconv.Atoi(i)
+		for _, change := range changedGroup {
+			if change.Type == "update" {
+				currentDeputy := deputiesInDB[deputyIndex]
+				setField(currentDeputy, change.Path[1], change.To.(string))
+			}
+		}
+		db.Save(&deputiesInDB[deputyIndex])
+	}
+	jsonContent, _ := json.MarshalIndent(groupedDiff, "", "  ")
 	jsonString := string(jsonContent)
 	fmt.Println(jsonString)
-	db.Save(&deputiesInDB)
+	// for _, deputy := range deputiesInDB {
+	// 	db.Save(&deputy)
+	// }
 
 	// Committing transaction
 	// tx.Commit()
