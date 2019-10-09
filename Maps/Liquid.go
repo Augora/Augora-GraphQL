@@ -17,6 +17,7 @@ func MapActivities(activities map[string]interface{}) string {
 	}
 	// fmt.Println(string(template))
 	out, err := engine.ParseAndRenderString(string(template), activities)
+	// fmt.Println(string(out))
 	if err != nil {
 		log.Fatalln(err)
 	}

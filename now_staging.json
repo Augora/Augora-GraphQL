@@ -1,0 +1,44 @@
+{
+  "version": 2,
+  "name": "Augora-API",
+  "public": false,
+  "scope": "augora",
+  "builds": [
+    {
+      "src": "Handler/**/*.go",
+      "use": "@now/go"
+    }
+  ],
+  "regions": ["cdg1"],
+  "env": {
+    "BACKEND_SQL_USER": "@backend_sql_user",
+    "BACKEND_SQL_PASSWORD": "@backend_sql_password",
+    "BACKEND_SQL_DATABASE": "@backend_sql_database_staging"
+  },
+  "routes": [
+    {
+      "src": "/ping",
+      "dest": "Handler/Rest/Ping.go"
+    },
+    {
+      "src": "/graphql",
+      "dest": "Handler/graphql.go"
+    },
+    {
+      "src": "/deputesenmandat",
+      "dest": "Handler/Rest/DeputiesInOffice.go"
+    },
+    {
+      "src": "/deputes",
+      "dest": "Handler/Rest/Deputies.go"
+    },
+    {
+      "src": "/deputes/(?<slug>[^/]+)",
+      "dest": "Handler/Rest/Deputy.go?slug=$slug"
+    },
+    {
+      "src": "/deputes/(?<slug>[^/]+)/activites/(?<numberOfWeeks>[^/]+)",
+      "dest": "Handler/Rest/DeputyActivities.go?slug=$slug&numberOfWeeks=$numberOfWeeks"
+    }
+  ]
+}

@@ -31,6 +31,7 @@ jobs:
               dep ensure
           fi
 
+<<<<<<< HEAD
       - name: Test
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -38,6 +39,8 @@ jobs:
           go test ./... -race -coverprofile=coverage.txt -covermode=atomic
           bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
 
+=======
+>>>>>>> develop
       - name: Build
         run: go build -v .
 
@@ -53,7 +56,7 @@ jobs:
         env:
           ZEIT_TOKEN: ${{ secrets.ZEIT_TOKEN }}
         with:
-          args: "npx now alias --token=$ZEIT_TOKEN $(npx now --no-clipboard --token=$ZEIT_TOKEN --public) sandbox.augora.fr"
+          args: "npx now alias --token=$ZEIT_TOKEN $(npx now -A now_staging.json --no-clipboard --token=$ZEIT_TOKEN --public) sandbox.augora.fr"
 
       - name: Notify slack
         env:
