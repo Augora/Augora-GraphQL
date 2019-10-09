@@ -2,14 +2,11 @@ package Importers
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/Augora/Augora-GraphQL/Maps"
@@ -64,37 +61,6 @@ func getDeputies() []Models.Depute {
 	return res
 }
 
-func setField(v interface{}, name string, value string) error {
-	// v must be a pointer to a struct
-	rv := reflect.ValueOf(v)
-	if rv.Kind() != reflect.Ptr || rv.Elem().Kind() != reflect.Struct {
-		return errors.New("v must be pointer to struct")
-	}
-
-	// Dereference pointer
-	rv = rv.Elem()
-
-	// Lookup field by name
-	fv := rv.FieldByName(name)
-	if !fv.IsValid() {
-		return fmt.Errorf("not a field name: %s", name)
-	}
-
-	// Field must be exported
-	if !fv.CanSet() {
-		return fmt.Errorf("cannot set field %s", name)
-	}
-
-	// We expect a string field
-	if fv.Kind() != reflect.String {
-		return fmt.Errorf("%s is not a string field", name)
-	}
-
-	// Set the value
-	fv.SetString(value)
-	return nil
-}
-
 func getDeputyActivities(slug string) []Models.Activity {
 	activitesResp, err := http.Get("https://www.nosdeputes.fr/" + slug + "/graphes/lastyear/total?questions=true&format=json")
 	if err != nil {
@@ -116,51 +82,98 @@ func getDeputyActivities(slug string) []Models.Activity {
 	return activities
 }
 
-func ImportDeputies() {
-	db := Utils.GetDataBaseConnection()
-	defer db.Close()
+func DiffFromDB(fromDB []Models.Depute, fromAPI []Models.Depute) []Models.DeputyDiff {
+	var res []Models.DeputyDiff
 
-	// Loading database models
-	// db.AutoMigrate(&Models.Depute{})
-	// db.AutoMigrate(&Models.Site{})
-	// db.AutoMigrate(&Models.Email{})
-	// db.AutoMigrate(&Models.Adresse{})
-	// db.AutoMigrate(&Models.Collaborateur{})
-	// db.AutoMigrate(&Models.Activity{})
-
-	// Begin transation
-	// tx := db.Begin()
-
-	var deputiesInDB []Models.Depute
-	db.Set("gorm:auto_preload", true).Find(&deputiesInDB)
-
-	deputies := getDeputies()
-	deputies[0].GroupeSigle = "LEL"
-	deputies = append(deputies, Models.Depute{Slug: "mdr"})
-
-	// Inserting deputes
-	changelog, _ := diff.Diff(deputiesInDB, deputies)
+	changelog, _ := diff.Diff(fromDB, fromAPI)
 	groupedDiff := make(map[string]diff.Changelog)
 	for _, change := range changelog {
 		groupedDiff[change.Path[0]] = append(groupedDiff[change.Path[0]], change)
 	}
 
-	for i, changedGroup := range groupedDiff {
-		deputyIndex, _ := strconv.Atoi(i)
-		for _, change := range changedGroup {
-			if change.Type == "update" {
-				currentDeputy := deputiesInDB[deputyIndex]
-				setField(currentDeputy, change.Path[1], change.To.(string))
+	for slug := range groupedDiff {
+		// changedGroup := groupedDiff[slug]
+		var deputyInDB Models.Depute
+		foundDeputyInDB := false
+		for i := range fromDB {
+			if fromDB[i].Slug == slug {
+				deputyInDB = fromDB[i]
+				foundDeputyInDB = true
+				break
 			}
 		}
-		db.Save(&deputiesInDB[deputyIndex])
+		// Check if deputy was found
+		if foundDeputyInDB {
+			foundDeputyInAPI := false
+			var deputyInAPI Models.Depute
+			for i := range fromAPI {
+				if fromAPI[i].Slug == slug {
+					deputyInAPI = fromAPI[i]
+					foundDeputyInAPI = true
+					break
+				}
+			}
+			if foundDeputyInAPI {
+				// Update
+				updatedDeputy := Models.MergeDeputies(deputyInDB, deputyInAPI)
+				newDiff := Models.DeputyDiff{
+					Operation: "Update",
+					Deputy:    updatedDeputy,
+				}
+				res = append(res, newDiff)
+			} else {
+				// Delete
+			}
+		} else {
+			// Create
+			var newDeputy Models.Depute
+			for i := range fromAPI {
+				if fromAPI[i].Slug == slug {
+					newDeputy = fromAPI[i]
+					break
+				}
+			}
+			newDiff := Models.DeputyDiff{
+				Operation: "Create",
+				Deputy:    newDeputy,
+			}
+			res = append(res, newDiff)
+		}
 	}
-	jsonContent, _ := json.MarshalIndent(groupedDiff, "", "  ")
-	jsonString := string(jsonContent)
-	fmt.Println(jsonString)
-	// for _, deputy := range deputiesInDB {
-	// 	db.Save(&deputy)
-	// }
+
+	return res
+}
+
+func ImportDeputies() {
+	db := Utils.GetDataBaseConnection()
+	defer db.Close()
+
+	// Begin transation
+	tx := db.Begin()
+
+	// Loading database models
+	tx.AutoMigrate(&Models.Depute{})
+	tx.AutoMigrate(&Models.Site{})
+	tx.AutoMigrate(&Models.Email{})
+	tx.AutoMigrate(&Models.Adresse{})
+	tx.AutoMigrate(&Models.Collaborateur{})
+	tx.AutoMigrate(&Models.Activity{})
+
+	deputies := getDeputies()
+	deputies[0].GroupeSigle = "FI"
+	var deputiesInDB []Models.Depute
+	db.Set("gorm:auto_preload", true).Find(&deputiesInDB)
+
+	diffs := DiffFromDB(deputiesInDB, deputies)
+
+	for _, diff := range diffs {
+		if diff.Operation == "Create" {
+			tx.Create(diff.Deputy)
+		}
+		if diff.Operation == "Update" {
+			tx.Save(diff.Deputy)
+		}
+	}
 
 	// Committing transaction
 	// tx.Commit()

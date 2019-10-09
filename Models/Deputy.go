@@ -13,25 +13,25 @@ type Deputes struct {
 type Site struct {
 	gorm.Model `json:"-" diff:"-"`
 	SiteRefer  uint   `json:"-" diff:"-"`
-	Site       string `json:"site"`
+	Site       string `json:"site" diff:"Site,identifier"`
 }
 
 type Email struct {
 	gorm.Model `json:"-" diff:"-"`
 	EmailRefer uint   `json:"-" diff:"-"`
-	Email      string `json:"email"`
+	Email      string `json:"email" diff:"Email,identifier"`
 }
 
 type Adresse struct {
 	gorm.Model   `json:"-" diff:"-"`
 	AdresseRefer uint   `json:"-" diff:"-"`
-	Adresse      string `json:"adresse"`
+	Adresse      string `json:"adresse" diff:"Adresse,identifier"`
 }
 
 type Collaborateur struct {
 	gorm.Model         `json:"-" diff:"-"`
 	CollaborateurRefer uint   `json:"-" diff:"-"`
-	Collaborateur      string `json:"collaborateur"`
+	Collaborateur      string `json:"collaborateur" diff:"Collaborateur,identifier"`
 }
 
 type DeputeHandler struct {
@@ -72,19 +72,68 @@ type Depute struct {
 	PlaceEnHemicyle    string `json:"place_en_hemicycle"`
 	UrlAN              string `json:"url_an"`
 	IDAN               string `json:"id_an"`
-	Slug               string `json:"slug"`
+	Slug               string `json:"slug" diff:"Slug,identifier"`
 	UrlNosDeputes      string `json:"url_nosdeputes"`
 	UrlNosDeputesAPI   string `json:"url_nosdeputes_api"`
 	NombreMandats      int    `json:"nb_mandats"`
 	Twitter            string `json:"twitter"`
 
 	// ForeignKey fields
-	SitesWeb       []Site          `json:"sites_web" gorm:"foreignkey:SiteRefer" diff:"-"`
-	Emails         []Email         `json:"emails" gorm:"foreignkey:EmailRefer" diff:"-"`
-	Adresses       []Adresse       `json:"adresses" gorm:"foreignkey:AdresseRefer" diff:"-"`
-	Collaborateurs []Collaborateur `json:"collaborateurs" gorm:"foreignkey:CollaborateurRefer" diff:"-"`
-	Activites      []Activity      `gorm:"foreignkey:ActivityRefer" json:"-" diff:"-"`
+	SitesWeb       []Site          `json:"sites_web" gorm:"foreignkey:SiteRefer"`
+	Emails         []Email         `json:"emails" gorm:"foreignkey:EmailRefer"`
+	Adresses       []Adresse       `json:"adresses" gorm:"foreignkey:AdresseRefer"`
+	Collaborateurs []Collaborateur `json:"collaborateurs" gorm:"foreignkey:CollaborateurRefer"`
+	Activites      []Activity      `gorm:"foreignkey:ActivityRefer" json:"-"`
 
 	// Custom fields
 	EstEnMandat bool `json:"-"`
+}
+
+type DeputyDiff struct {
+	Operation string
+	Deputy    Depute
+}
+
+func MergeDeputies(deputyFromDB Depute, deputyFromAPI Depute) Depute {
+	var newDeputy Depute
+	newDeputy = deputyFromAPI
+	newDeputy.ID = deputyFromDB.ID
+
+	// SitesWeb
+	for newSiteIdx := range newDeputy.SitesWeb {
+		for dbSiteIdx := range deputyFromDB.SitesWeb {
+			if newDeputy.SitesWeb[newSiteIdx].Site == deputyFromDB.SitesWeb[dbSiteIdx].Site {
+				newDeputy.SitesWeb[newSiteIdx].ID = deputyFromDB.SitesWeb[dbSiteIdx].ID
+			}
+		}
+	}
+
+	// Emails
+	for newEmailIdx := range newDeputy.Emails {
+		for dbEmailIdx := range deputyFromDB.Emails {
+			if newDeputy.Emails[newEmailIdx].Email == deputyFromDB.Emails[dbEmailIdx].Email {
+				newDeputy.Emails[newEmailIdx].ID = deputyFromDB.Emails[dbEmailIdx].ID
+			}
+		}
+	}
+
+	// Adresses
+	for newAdresseIdx := range newDeputy.Adresses {
+		for dbAdresseIdx := range deputyFromDB.Adresses {
+			if newDeputy.Adresses[newAdresseIdx].Adresse == deputyFromDB.Adresses[dbAdresseIdx].Adresse {
+				newDeputy.Adresses[newAdresseIdx].ID = deputyFromDB.Adresses[dbAdresseIdx].ID
+			}
+		}
+	}
+
+	// Collaborateurs
+	for newCollaborateurIdx := range newDeputy.Collaborateurs {
+		for dbCollaborateurIdx := range deputyFromDB.Collaborateurs {
+			if newDeputy.Collaborateurs[newCollaborateurIdx].Collaborateur == deputyFromDB.Collaborateurs[dbCollaborateurIdx].Collaborateur {
+				newDeputy.Collaborateurs[newCollaborateurIdx].ID = deputyFromDB.Collaborateurs[dbCollaborateurIdx].ID
+			}
+		}
+	}
+
+	return newDeputy
 }

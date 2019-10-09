@@ -1,9 +1,6 @@
-name: CI/CD Sandbox
+name: CI/CD Pull Request
 
-on:
-  push:
-    branches:
-      - develop
+on: pull_request
 
 jobs:
   build:
@@ -32,32 +29,9 @@ jobs:
           fi
 
       - name: Test
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: |
           go test ./... -race -coverprofile=coverage.txt -covermode=atomic
           bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
 
       - name: Build
         run: go build -v .
-
-  deploy:
-    name: Deploy
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-
-      - name: Deploy to Now
-        uses: mikeal/npx@master
-        env:
-          ZEIT_TOKEN: ${{ secrets.ZEIT_TOKEN }}
-        with:
-          args: "npx now alias --token=$ZEIT_TOKEN $(npx now --no-clipboard --token=$ZEIT_TOKEN --public) sandbox.augora.fr"
-
-      - name: Notify slack
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        uses: pullreminders/slack-action@master
-        with:
-          args: '{\"channel\":\"C4H19LCN9\",\"text\":\"Sandbox API successfully deployed :rocket:\"}'
