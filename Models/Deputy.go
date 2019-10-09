@@ -149,5 +149,23 @@ func MergeDeputies(deputyFromDB Depute, deputyFromAPI Depute) Depute {
 		}
 	}
 
+	// AnciensMandats
+	for newAnciensMandatIdx := range newDeputy.AnciensMandats {
+		for dbAnciensMandatIdx := range deputyFromDB.AnciensMandats {
+			if newDeputy.AnciensMandats[newAnciensMandatIdx].AncienMandat == deputyFromDB.AnciensMandats[dbAnciensMandatIdx].AncienMandat {
+				newDeputy.AnciensMandats[newAnciensMandatIdx].ID = deputyFromDB.AnciensMandats[dbAnciensMandatIdx].ID
+			}
+		}
+	}
+
+	// AutresMandats
+	for newAutresMandatIdx := range newDeputy.AutresMandats {
+		for dbAutresMandatIdx := range deputyFromDB.AutresMandats {
+			if newDeputy.AutresMandats[newAutresMandatIdx].AutreMandat == deputyFromDB.AutresMandats[dbAutresMandatIdx].AutreMandat {
+				newDeputy.AutresMandats[newAutresMandatIdx].ID = deputyFromDB.AutresMandats[dbAutresMandatIdx].ID
+			}
+		}
+	}
+
 	return newDeputy
 }
