@@ -31,7 +31,6 @@ jobs:
               dep ensure
           fi
 
-<<<<<<< HEAD
       - name: Test
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -39,8 +38,6 @@ jobs:
           go test ./... -race -coverprofile=coverage.txt -covermode=atomic
           bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
 
-=======
->>>>>>> develop
       - name: Build
         run: go build -v .
 
