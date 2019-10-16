@@ -122,7 +122,7 @@ func DiffFromDB(fromDB []Models.Depute, fromAPI []Models.Depute) []Models.Deputy
 				}
 				res = append(res, newDiff)
 			} else {
-				// Delete
+				// ToDo: Delete
 			}
 		} else {
 			// Create
@@ -157,6 +157,8 @@ func ImportDeputies() {
 	tx.AutoMigrate(&Models.Email{})
 	tx.AutoMigrate(&Models.Adresse{})
 	tx.AutoMigrate(&Models.Collaborateur{})
+	tx.AutoMigrate(&Models.AutreMandat{})
+	tx.AutoMigrate(&Models.AncienMandat{})
 	tx.AutoMigrate(&Models.Activity{})
 
 	deputies := getDeputies()
@@ -165,15 +167,18 @@ func ImportDeputies() {
 	db.Set("gorm:auto_preload", true).Find(&deputiesInDB)
 
 	diffs := DiffFromDB(deputiesInDB, deputies)
+	jsonContent, _ := json.MarshalIndent(diffs, "", "  ")
+	jsonString := string(jsonContent)
+	fmt.Println(jsonString)
 
-	for _, diff := range diffs {
-		if diff.Operation == "Create" {
-			tx.Create(diff.Deputy)
-		}
-		if diff.Operation == "Update" {
-			tx.Save(diff.Deputy)
-		}
-	}
+	// for _, diff := range diffs {
+	// 	if diff.Operation == "Create" {
+	// 		tx.Create(diff.Deputy)
+	// 	}
+	// 	if diff.Operation == "Update" {
+	// 		tx.Save(diff.Deputy)
+	// 	}
+	// }
 
 	// Committing transaction
 	// tx.Commit()
