@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Augora/Augora-GraphQL/Maps"
 	"github.com/Augora/Augora-GraphQL/Models"
@@ -70,10 +71,27 @@ func getDeputyActivities(slug string) []Models.Activity {
 	json.Unmarshal(bodyBytes, &activitesFromAPI)
 	mappedActivities := Maps.MapActivities(activitesFromAPI)
 
-	var activities []Models.Activity
+	var activities Models.ActivitiesHandler
 	json.NewDecoder(strings.NewReader(mappedActivities)).Decode(&activities)
 
-	return activities
+	layoutISO := "2006-01-02"
+	t, _ := time.Parse(layoutISO, activities.DateFin)
+	for {
+		if t.Weekday() == 1 {
+			break
+		}
+		t = t.AddDate(0, 0, -1)
+	}
+	log.Println("Found date:" + t.String())
+
+	for i := range activities.Data {
+		newStartDate := t.AddDate(0, 0, (int)(-(54-activities.Data[i].WeekNumber)*7))
+		newEndDate := newStartDate.AddDate(0, 0, 7)
+		activities.Data[i].StartDate = newStartDate
+		activities.Data[i].EndDate = newEndDate
+	}
+
+	return activities.Data
 }
 
 func ImportDeputies() {

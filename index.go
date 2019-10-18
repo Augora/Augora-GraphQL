@@ -12,7 +12,7 @@ import (
 func main() {
 	if os.Getenv("IMPORT") == "True" {
 		Importers.ImportDeputies()
-		Importers.ImportFiles()
+		// Importers.ImportFiles()
 	} else {
 		http.HandleFunc("/graphql", Handler.GraphQLHTTPHandler)
 		http.HandleFunc("/deputes", Rest.DeputiesHandler)

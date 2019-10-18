@@ -50,11 +50,19 @@ type DeputeHandler struct {
 	Depute Depute `json:"depute"`
 }
 
+type ActivitiesHandler struct {
+	DateDebut     string     `json:"date_debut"`
+	DateDebutParl string     `json:"date_debut_parl"`
+	DateFin       string     `json:"date_fin"`
+	Data          []Activity `json:"data"`
+}
+
 type Activity struct {
 	gorm.Model               `json:"-"`
 	ActivityRefer            uint `json:"-"`
-	StartDate                *time.Time
-	EndDate                  *time.Time
+	StartDate                time.Time
+	EndDate                  time.Time
+	WeekNumber               uint `json:"weekNumber"`
 	PresencesCommission      uint `json:"presencesCommission"`
 	PresencesHemicycle       uint `json:"presencesHemicycle"`
 	ParticipationsCommission uint `json:"participationsCommission"`
@@ -62,7 +70,6 @@ type Activity struct {
 	Questions                uint `json:"questions"`
 	Vacances                 uint `json:"vacances"`
 }
-
 type Depute struct {
 	gorm.Model `json:"-"`
 
