@@ -9,14 +9,14 @@ import (
 	"github.com/Augora/Augora-GraphQL/Utils"
 )
 
-func DeputyHandler(w http.ResponseWriter, r *http.Request) {
+func ActivitiesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", "s-maxage=3600")
 	db := Utils.GetDataBaseConnection()
 
 	var depute Models.Depute
 	slug := r.URL.Query()["slug"][0]
-	queryResult := db.Preload("SitesWeb").Preload("Emails").Preload("Adresses").Preload("Collaborateurs").Preload("AnciensMandats").Preload("AutresMandats").Where(&Models.Depute{Slug: slug}).Find(&depute)
+	queryResult := db.Preload("Activites").Where(&Models.Depute{Slug: slug}).Find(&depute)
 	errors := queryResult.GetErrors()
 	var count int
 	queryResult.Count(&count)
@@ -27,14 +27,14 @@ func DeputyHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		if count > 0 {
 			w.WriteHeader(http.StatusOK)
-			res, _ := json.Marshal(depute)
+			res, _ := json.Marshal(depute.Activites)
 			fmt.Fprintf(w, string(res))
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
 			var tmp struct {
-				Error string `json:"error"`
+				error string `json:"error"`
 			}
-			tmp.Error = "This deputy does not exists."
+			tmp.error = "This deputy does not exists."
 			res, _ := json.Marshal(tmp)
 			fmt.Fprintf(w, string(res))
 		}

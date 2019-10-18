@@ -56,7 +56,7 @@ func getDeputies() []Models.DeputeHandler {
 	return deputes.Deputes
 }
 
-func getDeputyActivities(slug string) []Models.Activity {
+func getDeputyActivities(slug string) []Models.Activite {
 	activitesResp, err := http.Get("https://www.nosdeputes.fr/" + slug + "/graphes/lastyear/total?questions=true&format=json")
 	if err != nil {
 		log.Println(err)
@@ -71,7 +71,7 @@ func getDeputyActivities(slug string) []Models.Activity {
 	json.Unmarshal(bodyBytes, &activitesFromAPI)
 	mappedActivities := Maps.MapActivities(activitesFromAPI)
 
-	var activities Models.ActivitiesHandler
+	var activities Models.ActivitesHandler
 	json.NewDecoder(strings.NewReader(mappedActivities)).Decode(&activities)
 
 	layoutISO := "2006-01-02"
@@ -82,13 +82,12 @@ func getDeputyActivities(slug string) []Models.Activity {
 		}
 		t = t.AddDate(0, 0, -1)
 	}
-	log.Println("Found date:" + t.String())
 
 	for i := range activities.Data {
-		newStartDate := t.AddDate(0, 0, (int)(-(54-activities.Data[i].WeekNumber)*7))
+		newStartDate := t.AddDate(0, 0, (int)(-(54-activities.Data[i].NumeroDeSemaine)*7))
 		newEndDate := newStartDate.AddDate(0, 0, 7)
-		activities.Data[i].StartDate = newStartDate
-		activities.Data[i].EndDate = newEndDate
+		activities.Data[i].DateDebut = newStartDate
+		activities.Data[i].DateFin = newEndDate
 	}
 
 	return activities.Data
@@ -105,7 +104,7 @@ func ImportDeputies() {
 	db.AutoMigrate(&Models.Collaborateur{})
 	db.AutoMigrate(&Models.AncienMandat{})
 	db.AutoMigrate(&Models.AutreMandat{})
-	db.AutoMigrate(&Models.Activity{})
+	db.AutoMigrate(&Models.Activite{})
 
 	// Begin transation
 	tx := db.Begin()
@@ -118,7 +117,7 @@ func ImportDeputies() {
 	tx.Unscoped().Delete(&Models.Collaborateur{})
 	tx.Unscoped().Delete(&Models.AncienMandat{})
 	tx.Unscoped().Delete(&Models.AutreMandat{})
-	tx.Unscoped().Delete(&Models.Activity{})
+	tx.Unscoped().Delete(&Models.Activite{})
 
 	// Inserting deputes
 	for _, depute := range getDeputies() {

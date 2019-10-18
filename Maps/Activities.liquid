@@ -6,11 +6,11 @@
     {% for week in (1..54) %}
       {% capture weekAsString %}{{ week }}{% endcapture  %}
       {
-        "weekNumber": {{ week }},
-        "presencesCommission": {{ n_presences.commission[weekAsString] }},
-        "presencesHemicycle": {{ n_presences.hemicycle[weekAsString] }},
-        "participationsCommission": {{ n_participations.hemicycle[weekAsString] }},
-        "participationsHemicycle": {{ n_participations.hemicycle[weekAsString] }},
+        "numero_de_semaine": {{ week }},
+        "presences_commission": {{ n_presences.commission[weekAsString] }},
+        "presences_hemicycle": {{ n_presences.hemicycle[weekAsString] }},
+        "participations_commission": {{ n_participations.hemicycle[weekAsString] }},
+        "participations_hemicycle": {{ n_participations.hemicycle[weekAsString] }},
         "questions": {{ n_questions[weekAsString] }},
         "vacances": {{ vacances[weekAsString] }}
       }{% if week != 54 %},{% endif %}
