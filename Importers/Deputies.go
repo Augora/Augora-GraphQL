@@ -188,15 +188,15 @@ func ImportDeputies() {
 	jsonString := string(jsonContent)
 	fmt.Println(jsonString)
 
-	// for _, diff := range diffs {
-	// 	if diff.Operation == "Create" {
-	// 		tx.Create(diff.Deputy)
-	// 	}
-	// 	if diff.Operation == "Update" {
-	// 		tx.Save(diff.Deputy)
-	// 	}
-	// }
+	for _, diff := range diffs {
+		if diff.Operation == "Create" {
+			tx.Create(diff.Deputy)
+		}
+		if diff.Operation == "Update" {
+			tx.Save(diff.Deputy)
+		}
+	}
 
 	// Committing transaction
-	// tx.Commit()
+	tx.Commit()
 }

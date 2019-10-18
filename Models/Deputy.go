@@ -29,14 +29,14 @@ type Adresse struct {
 }
 
 type AncienMandat struct {
-	gorm.Model        `json:"-"`
-	AncienMandatRefer uint   `json:"-"`
+	gorm.Model        `json:"-" diff:"-"`
+	AncienMandatRefer uint   `json:"-" diff:"-"`
 	AncienMandat      string `json:"mandat"`
 }
 
 type AutreMandat struct {
-	gorm.Model       `json:"-"`
-	AutreMandatRefer uint   `json:"-"`
+	gorm.Model       `json:"-" diff:"-"`
+	AutreMandatRefer uint   `json:"-" diff:"-"`
 	AutreMandat      string `json:"mandat"`
 }
 
@@ -58,10 +58,10 @@ type ActivitesHandler struct {
 }
 
 type Activite struct {
-	gorm.Model               `json:"-"`
-	ActiviteRefer            uint      `json:"-"`
-	DateDebut                time.Time `json:"date_debut"`
-	DateFin                  time.Time `json:"date_fin"`
+	gorm.Model               `json:"-" diff:"-"`
+	ActiviteRefer            uint      `json:"-" diff:"-"`
+	DateDebut                time.Time `json:"date_debut" diff:"-"`
+	DateFin                  time.Time `json:"date_fin" diff:"-"`
 	NumeroDeSemaine          uint      `json:"numero_de_semaine" diff:"NumeroDeSemaine,identifier"`
 	PresencesCommission      uint      `json:"presences_commission"`
 	PresencesHemicycle       uint      `json:"presences_hemicycle"`
@@ -104,7 +104,7 @@ type Depute struct {
 	Collaborateurs []Collaborateur `json:"collaborateurs" gorm:"foreignkey:CollaborateurRefer"`
 	AnciensMandats []AncienMandat  `json:"anciens_mandats" gorm:"foreignkey:AncienMandatRefer"`
 	AutresMandats  []AutreMandat   `json:"autres_mandats" gorm:"foreignkey:AutreMandatRefer"`
-	Activites      []Activite      `gorm:"foreignkey:ActiviteRefer" json:"-"`
+	Activites      []Activite      `json:"-" gorm:"foreignkey:ActiviteRefer"`
 
 	// Custom fields
 	EstEnMandat bool `json:"-"`
@@ -170,6 +170,15 @@ func MergeDeputies(deputyFromDB Depute, deputyFromAPI Depute) Depute {
 		for dbAutresMandatIdx := range deputyFromDB.AutresMandats {
 			if newDeputy.AutresMandats[newAutresMandatIdx].AutreMandat == deputyFromDB.AutresMandats[dbAutresMandatIdx].AutreMandat {
 				newDeputy.AutresMandats[newAutresMandatIdx].ID = deputyFromDB.AutresMandats[dbAutresMandatIdx].ID
+			}
+		}
+	}
+
+	// Activites
+	for newActivitesIdx := range newDeputy.Activites {
+		for dbActivitesIdx := range deputyFromDB.Activites {
+			if newDeputy.Activites[newActivitesIdx].NumeroDeSemaine == deputyFromDB.Activites[dbActivitesIdx].NumeroDeSemaine {
+				newDeputy.Activites[newActivitesIdx].ID = deputyFromDB.Activites[dbActivitesIdx].ID
 			}
 		}
 	}

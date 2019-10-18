@@ -22,25 +22,21 @@ func DeputyHandler(w http.ResponseWriter, r *http.Request) {
 	queryResult.Count(&count)
 	if len(errors) > 0 {
 		w.WriteHeader(http.StatusInternalServerError)
-		var tmpErrors []struct {
-			Error string `json:"error"`
-		}
-		for _, err := range errors {
+		res, _ := json.Marshal(errors)
+		fmt.Fprintf(w, string(res))
+	} else {
+		if count > 0 {
+			w.WriteHeader(http.StatusOK)
+			res, _ := json.Marshal(depute)
+			fmt.Fprintf(w, string(res))
+		} else {
+			w.WriteHeader(http.StatusBadRequest)
 			var tmp struct {
-				Error string `json:"error"`
+				error string `json:"error"`
 			}
-			tmp.Error = "This deputy does not exists."
+			tmp.error = "This deputy does not exists."
 			res, _ := json.Marshal(tmp)
 			fmt.Fprintf(w, string(res))
 		}
-		res, _ := json.Marshal(tmpErrors)
-		fmt.Fprintf(w, string(res))
-		fmt.Println("Errors sent")
-	} else {
-		fmt.Println("Everything went well sending response...")
-		w.WriteHeader(http.StatusOK)
-		res, _ := json.Marshal(depute)
-		fmt.Fprintf(w, string(res))
-		fmt.Println("Response sent")
 	}
 }
