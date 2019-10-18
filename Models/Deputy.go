@@ -50,24 +50,31 @@ type DeputeHandler struct {
 	Depute Depute `json:"depute"`
 }
 
-type Activity struct {
+type ActivitesHandler struct {
+	DateDebut     string     `json:"date_debut"`
+	DateDebutParl string     `json:"date_debut_parl"`
+	DateFin       string     `json:"date_fin"`
+	Data          []Activite `json:"data"`
+}
+
+type Activite struct {
 	gorm.Model               `json:"-"`
-	ActivityRefer            uint `json:"-"`
-	StartDate                *time.Time
-	EndDate                  *time.Time
-	PresencesCommission      uint `json:"presencesCommission"`
-	PresencesHemicycle       uint `json:"presencesHemicycle"`
-	ParticipationsCommission uint `json:"participationsCommission"`
-	ParticipationsHemicycle  uint `json:"participationsHemicycle"`
-	Questions                uint `json:"questions"`
-	Vacances                 uint `json:"vacances"`
+	ActiviteRefer            uint      `json:"-"`
+	DateDebut                time.Time `json:"date_debut"`
+	DateFin                  time.Time `json:"date_fin"`
+	NumeroDeSemaine          uint      `json:"numero_de_semaine"`
+	PresencesCommission      uint      `json:"presences_commission"`
+	PresencesHemicycle       uint      `json:"presences_hemicycle"`
+	ParticipationsCommission uint      `json:"participations_commission"`
+	ParticipationsHemicycle  uint      `json:"participations_hemicycle"`
+	Questions                uint      `json:"questions"`
+	Vacances                 uint      `json:"vacances"`
 }
 
 type Depute struct {
 	gorm.Model `json:"-"`
 
 	// Fields from API
-	IDFromAPI          uint   `json:"id"`
 	Nom                string `json:"nom"`
 	NomDeFamille       string `json:"nom_de_famille"`
 	Prenom             string `json:"prenom"`
@@ -91,13 +98,13 @@ type Depute struct {
 	Twitter            string `json:"twitter"`
 
 	// ForeignKey fields
-	SitesWeb       []Site          `json:"sites_web" gorm:"foreignkey:SiteRefer"`
+	Sites          []Site          `json:"sites_web" gorm:"foreignkey:SiteRefer"`
 	Emails         []Email         `json:"emails" gorm:"foreignkey:EmailRefer"`
 	Adresses       []Adresse       `json:"adresses" gorm:"foreignkey:AdresseRefer"`
 	Collaborateurs []Collaborateur `json:"collaborateurs" gorm:"foreignkey:CollaborateurRefer"`
 	AnciensMandats []AncienMandat  `json:"anciens_mandats" gorm:"foreignkey:AncienMandatRefer"`
 	AutresMandats  []AutreMandat   `json:"autres_mandats" gorm:"foreignkey:AutreMandatRefer"`
-	Activites      []Activity      `gorm:"foreignkey:ActivityRefer" json:"-"`
+	Activites      []Activite      `gorm:"foreignkey:ActiviteRefer" json:"-"`
 
 	// Custom fields
 	EstEnMandat bool `json:"-"`
