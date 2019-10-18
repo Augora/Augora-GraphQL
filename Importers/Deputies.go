@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Augora/Augora-GraphQL/Maps"
 	"github.com/Augora/Augora-GraphQL/Models"
@@ -61,7 +62,7 @@ func getDeputies() []Models.Depute {
 	return res
 }
 
-func getDeputyActivities(slug string) []Models.Activity {
+func getDeputyActivities(slug string) []Models.Activite {
 	activitesResp, err := http.Get("https://www.nosdeputes.fr/" + slug + "/graphes/lastyear/total?questions=true&format=json")
 	if err != nil {
 		log.Println(err)
@@ -76,10 +77,26 @@ func getDeputyActivities(slug string) []Models.Activity {
 	json.Unmarshal(bodyBytes, &activitesFromAPI)
 	mappedActivities := Maps.MapActivities(activitesFromAPI)
 
-	var activities []Models.Activity
+	var activities Models.ActivitesHandler
 	json.NewDecoder(strings.NewReader(mappedActivities)).Decode(&activities)
 
-	return activities
+	layoutISO := "2006-01-02"
+	t, _ := time.Parse(layoutISO, activities.DateFin)
+	for {
+		if t.Weekday() == 1 {
+			break
+		}
+		t = t.AddDate(0, 0, -1)
+	}
+
+	for i := range activities.Data {
+		newStartDate := t.AddDate(0, 0, (int)(-(54-activities.Data[i].NumeroDeSemaine)*7))
+		newEndDate := newStartDate.AddDate(0, 0, 7)
+		activities.Data[i].DateDebut = newStartDate
+		activities.Data[i].DateFin = newEndDate
+	}
+
+	return activities.Data
 }
 
 func DiffFromDB(fromDB []Models.Depute, fromAPI []Models.Depute) []Models.DeputyDiff {
@@ -159,7 +176,7 @@ func ImportDeputies() {
 	tx.AutoMigrate(&Models.Collaborateur{})
 	tx.AutoMigrate(&Models.AutreMandat{})
 	tx.AutoMigrate(&Models.AncienMandat{})
-	tx.AutoMigrate(&Models.Activity{})
+	tx.AutoMigrate(&Models.Activite{})
 
 	deputies := getDeputies()
 	deputies[0].GroupeSigle = "FI"

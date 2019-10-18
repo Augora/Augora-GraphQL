@@ -16,10 +16,11 @@ func DeputyHandler(w http.ResponseWriter, r *http.Request) {
 
 	var depute Models.Depute
 	slug := r.URL.Query()["slug"][0]
-	queryResult := db.Preload("SitesWeb").Preload("Emails").Preload("Adresses").Preload("Collaborateurs").Where(&Models.Depute{Slug: slug}).Find(&depute)
+	queryResult := db.Preload("SitesWeb").Preload("Emails").Preload("Adresses").Preload("Collaborateurs").Preload("AnciensMandats").Preload("AutresMandats").Where(&Models.Depute{Slug: slug}).Find(&depute)
 	errors := queryResult.GetErrors()
+	var count int
+	queryResult.Count(&count)
 	if len(errors) > 0 {
-		fmt.Println("Some errors occured during the request:", errors)
 		w.WriteHeader(http.StatusInternalServerError)
 		var tmpErrors []struct {
 			Error string `json:"error"`
@@ -28,8 +29,9 @@ func DeputyHandler(w http.ResponseWriter, r *http.Request) {
 			var tmp struct {
 				Error string `json:"error"`
 			}
-			tmp.Error = err.Error()
-			tmpErrors = append(tmpErrors, tmp)
+			tmp.Error = "This deputy does not exists."
+			res, _ := json.Marshal(tmp)
+			fmt.Fprintf(w, string(res))
 		}
 		res, _ := json.Marshal(tmpErrors)
 		fmt.Fprintf(w, string(res))
