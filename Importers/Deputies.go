@@ -179,7 +179,6 @@ func ImportDeputies() {
 	tx.AutoMigrate(&Models.Activite{})
 
 	deputies := getDeputies()
-	deputies[0].GroupeSigle = "FI"
 	var deputiesInDB []Models.Depute
 	db.Set("gorm:auto_preload", true).Find(&deputiesInDB)
 

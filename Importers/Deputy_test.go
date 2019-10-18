@@ -29,7 +29,7 @@ var _ = Describe("Deputy", func() {
 					{
 						Slug:    "lel",
 						Twitter: "@lel",
-						Activites: []Models.Activity{
+						Activites: []Models.Activite{
 							{
 								PresencesCommission:      1,
 								PresencesHemicycle:       2,
