@@ -32,9 +32,9 @@ func DeputyHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
 			var tmp struct {
-				Error string `json:"error"`
+				error string `json:"error"`
 			}
-			tmp.Error = "This deputy does not exists."
+			tmp.error = "This deputy does not exists."
 			res, _ := json.Marshal(tmp)
 			fmt.Fprintf(w, string(res))
 		}

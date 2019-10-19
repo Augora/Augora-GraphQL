@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	if os.Getenv("IMPORT") == "True" {
+	if os.Getenv("IMPORT") == "True" || true {
 		Importers.ImportDeputies()
 		// Importers.ImportFiles()
 	} else {

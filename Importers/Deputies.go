@@ -13,9 +13,10 @@ import (
 	"github.com/Augora/Augora-GraphQL/Maps"
 	"github.com/Augora/Augora-GraphQL/Models"
 	"github.com/Augora/Augora-GraphQL/Utils"
+	"github.com/r3labs/diff"
 )
 
-func getDeputies() []Models.DeputeHandler {
+func getDeputies() []Models.Depute {
 	log.Println("Getting deputies...")
 	deputesResp, err := http.Get("https://www.nosdeputes.fr/deputes/json")
 	if err != nil {
@@ -53,7 +54,12 @@ func getDeputies() []Models.DeputeHandler {
 		}
 	}
 
-	return deputes.Deputes
+	var res []Models.Depute
+	for _, depute := range deputes.Deputes {
+		res = append(res, depute.Depute)
+	}
+
+	return res
 }
 
 func getDeputyActivities(slug string) []Models.Activite {
@@ -93,36 +99,101 @@ func getDeputyActivities(slug string) []Models.Activite {
 	return activities.Data
 }
 
+func DiffFromDB(fromDB []Models.Depute, fromAPI []Models.Depute) []Models.DeputyDiff {
+	var res []Models.DeputyDiff
+
+	changelog, _ := diff.Diff(fromDB, fromAPI)
+	groupedDiff := make(map[string]diff.Changelog)
+	for _, change := range changelog {
+		groupedDiff[change.Path[0]] = append(groupedDiff[change.Path[0]], change)
+	}
+
+	for slug := range groupedDiff {
+		// changedGroup := groupedDiff[slug]
+		var deputyInDB Models.Depute
+		foundDeputyInDB := false
+		for i := range fromDB {
+			if fromDB[i].Slug == slug {
+				deputyInDB = fromDB[i]
+				foundDeputyInDB = true
+				break
+			}
+		}
+		// Check if deputy was found
+		if foundDeputyInDB {
+			foundDeputyInAPI := false
+			var deputyInAPI Models.Depute
+			for i := range fromAPI {
+				if fromAPI[i].Slug == slug {
+					deputyInAPI = fromAPI[i]
+					foundDeputyInAPI = true
+					break
+				}
+			}
+			if foundDeputyInAPI {
+				// Update
+				updatedDeputy := Models.MergeDeputies(deputyInDB, deputyInAPI)
+				newDiff := Models.DeputyDiff{
+					Operation: "Update",
+					Deputy:    updatedDeputy,
+				}
+				res = append(res, newDiff)
+			} else {
+				// ToDo: Delete
+			}
+		} else {
+			// Create
+			var newDeputy Models.Depute
+			for i := range fromAPI {
+				if fromAPI[i].Slug == slug {
+					newDeputy = fromAPI[i]
+					break
+				}
+			}
+			newDiff := Models.DeputyDiff{
+				Operation: "Create",
+				Deputy:    newDeputy,
+			}
+			res = append(res, newDiff)
+		}
+	}
+
+	return res
+}
+
 func ImportDeputies() {
 	db := Utils.GetDataBaseConnection()
-
-	// Loading database models
-	db.AutoMigrate(&Models.Depute{})
-	db.AutoMigrate(&Models.Site{})
-	db.AutoMigrate(&Models.Email{})
-	db.AutoMigrate(&Models.Adresse{})
-	db.AutoMigrate(&Models.Collaborateur{})
-	db.AutoMigrate(&Models.AncienMandat{})
-	db.AutoMigrate(&Models.AutreMandat{})
-	db.AutoMigrate(&Models.Activite{})
+	defer db.Close()
 
 	// Begin transation
 	tx := db.Begin()
 
-	// Clear current data
-	tx.Unscoped().Delete(&Models.Depute{})
-	tx.Unscoped().Delete(&Models.Site{})
-	tx.Unscoped().Delete(&Models.Email{})
-	tx.Unscoped().Delete(&Models.Adresse{})
-	tx.Unscoped().Delete(&Models.Collaborateur{})
-	tx.Unscoped().Delete(&Models.AncienMandat{})
-	tx.Unscoped().Delete(&Models.AutreMandat{})
-	tx.Unscoped().Delete(&Models.Activite{})
+	// Loading database models
+	tx.AutoMigrate(&Models.Depute{})
+	tx.AutoMigrate(&Models.Site{})
+	tx.AutoMigrate(&Models.Email{})
+	tx.AutoMigrate(&Models.Adresse{})
+	tx.AutoMigrate(&Models.Collaborateur{})
+	tx.AutoMigrate(&Models.AutreMandat{})
+	tx.AutoMigrate(&Models.AncienMandat{})
+	tx.AutoMigrate(&Models.Activite{})
 
-	// Inserting deputes
-	for _, depute := range getDeputies() {
-		depute.Depute.ID = 0
-		tx.Create(&depute.Depute)
+	deputies := getDeputies()
+	var deputiesInDB []Models.Depute
+	db.Set("gorm:auto_preload", true).Find(&deputiesInDB)
+
+	diffs := DiffFromDB(deputiesInDB, deputies)
+	jsonContent, _ := json.MarshalIndent(diffs, "", "  ")
+	jsonString := string(jsonContent)
+	fmt.Println(jsonString)
+
+	for _, diff := range diffs {
+		if diff.Operation == "Create" {
+			tx.Create(diff.Deputy)
+		}
+		if diff.Operation == "Update" {
+			tx.Save(diff.Deputy)
+		}
 	}
 
 	// Committing transaction
