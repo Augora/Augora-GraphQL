@@ -59,6 +59,7 @@ func getDeputies() []Models.Depute {
 		res = append(res, depute.Depute)
 	}
 
+	log.Println("End getDeputies!")
 	return res
 }
 
@@ -147,6 +148,7 @@ func DiffFromDB(fromDB []Models.Depute, fromAPI []Models.Depute) []Models.Deputy
 			for i := range fromAPI {
 				if fromAPI[i].Slug == slug {
 					newDeputy = fromAPI[i]
+					newDeputy.ID = 0
 					break
 				}
 			}
@@ -180,7 +182,7 @@ func ImportDeputies() {
 
 	deputies := getDeputies()
 	var deputiesInDB []Models.Depute
-	db.Set("gorm:auto_preload", true).Find(&deputiesInDB)
+	tx.Set("gorm:auto_preload", true).Find(&deputiesInDB)
 
 	diffs := DiffFromDB(deputiesInDB, deputies)
 	jsonContent, _ := json.MarshalIndent(diffs, "", "  ")

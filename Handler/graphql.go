@@ -85,7 +85,7 @@ func (s *server) registerDepute(schema *schemabuilder.Schema) {
 		return result, nil
 	})
 
-	object.FieldFunc("anciensMandats", func(ctx context.Context, m *Models.Depute) ([]string, error) {
+	object.FieldFunc("autresMandats", func(ctx context.Context, m *Models.Depute) ([]string, error) {
 		var result []string
 		for _, autreMandat := range m.AutresMandats {
 			result = append(result, autreMandat.AutreMandat)
@@ -93,7 +93,7 @@ func (s *server) registerDepute(schema *schemabuilder.Schema) {
 		return result, nil
 	})
 
-	object.FieldFunc("autresMandats", func(ctx context.Context, m *Models.Depute) ([]string, error) {
+	object.FieldFunc("anciensMandats", func(ctx context.Context, m *Models.Depute) ([]string, error) {
 		var result []string
 		for _, ancienMandat := range m.AnciensMandats {
 			result = append(result, ancienMandat.AncienMandat)
