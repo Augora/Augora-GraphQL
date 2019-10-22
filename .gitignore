@@ -16,3 +16,6 @@ vendor/
 
 # MacOS specific
 .DS_Store
+
+# Logs
+logs.txt

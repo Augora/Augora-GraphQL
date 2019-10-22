@@ -21,7 +21,7 @@ func (s *server) registerQuery(schema *schemabuilder.Schema) {
 		var deputes []Models.Depute
 		db := Utils.GetDataBaseConnection()
 		defer db.Close()
-		db.Set("gorm:auto_preload", true).Find(&deputes)
+		db.Set("gorm:auto_preload", true).Order("nom").Order("prenom").Find(&deputes)
 		return deputes
 	})
 
@@ -29,7 +29,7 @@ func (s *server) registerQuery(schema *schemabuilder.Schema) {
 		var deputes []Models.Depute
 		db := Utils.GetDataBaseConnection()
 		defer db.Close()
-		db.Set("gorm:auto_preload", true).Where(&Models.Depute{EstEnMandat: true}).Find(&deputes)
+		db.Set("gorm:auto_preload", true).Where(&Models.Depute{EstEnMandat: true}).Order("nom").Order("prenom").Find(&deputes)
 		return deputes
 	})
 

@@ -7,14 +7,13 @@
       {% capture weekAsString %}{{ week }}{% endcapture  %}
       {
         "numero_de_semaine": {{ week }},
-        "presences_commission": {{ n_presences.commission[weekAsString] }},
-        "presences_hemicycle": {{ n_presences.hemicycle[weekAsString] }},
-        "participations_commission": {{ n_participations.hemicycle[weekAsString] }},
-        "participations_hemicycle": {{ n_participations.hemicycle[weekAsString] }},
-        "questions": {{ n_questions[weekAsString] }},
-        "vacances": {{ vacances[weekAsString] }}
+        "presences_commission": {{ n_presences.commission[weekAsString] | round | default: 0 }},
+        "presences_hemicycle": {{ n_presences.hemicycle[weekAsString] | round | default: 0 }},
+        "participations_commission": {{ n_participations.hemicycle[weekAsString] | round | default: 0 }},
+        "participations_hemicycle": {{ n_participations.hemicycle[weekAsString] | round | default: 0 }},
+        "questions": {{ n_questions[weekAsString] | round | default: 0 }},
+        "vacances": {{ vacances[weekAsString] | round | default: 0 }}
       }{% if week != 54 %},{% endif %}
     {% endfor %}
   ]
 }
-

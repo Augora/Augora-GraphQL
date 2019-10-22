@@ -11,38 +11,44 @@ type Deputes struct {
 }
 
 type Site struct {
-	gorm.Model `json:"-" diff:"-"`
-	SiteRefer  uint   `json:"-" diff:"-"`
+	gorm.Model `diff:"-"`
+	SiteRefer  uint   `diff:"-"`
 	Site       string `json:"site" diff:"Site,identifier"`
 }
 
 type Email struct {
-	gorm.Model `json:"-" diff:"-"`
-	EmailRefer uint   `json:"-" diff:"-"`
+	gorm.Model `diff:"-"`
+	EmailRefer uint   `diff:"-"`
 	Email      string `json:"email" diff:"Email,identifier"`
 }
 
 type Adresse struct {
-	gorm.Model   `json:"-" diff:"-"`
-	AdresseRefer uint   `json:"-" diff:"-"`
+	gorm.Model   `diff:"-"`
+	AdresseRefer uint   `diff:"-"`
 	Adresse      string `json:"adresse" diff:"Adresse,identifier"`
 }
 
 type AncienMandat struct {
-	gorm.Model        `json:"-" diff:"-"`
-	AncienMandatRefer uint   `json:"-" diff:"-"`
-	AncienMandat      string `json:"mandat"`
+	gorm.Model        `diff:"-"`
+	AncienMandatRefer uint      `diff:"-"`
+	AncienMandat      string    `json:"mandat" diff:"AncienMandat,identifier"`
+	DateDebut         time.Time `diff:"-"`
+	DateFin           time.Time `diff:"-"`
+	Intitule          string    `diff:"-"`
 }
 
 type AutreMandat struct {
-	gorm.Model       `json:"-" diff:"-"`
-	AutreMandatRefer uint   `json:"-" diff:"-"`
-	AutreMandat      string `json:"mandat"`
+	gorm.Model       `diff:"-"`
+	AutreMandatRefer uint      `diff:"-"`
+	AutreMandat      string    `json:"mandat" diff:"AutreMandat,identifier"`
+	DateDebut        time.Time `diff:"-"`
+	DateFin          time.Time `diff:"-"`
+	Intitule         string    `diff:"-"`
 }
 
 type Collaborateur struct {
-	gorm.Model         `json:"-" diff:"-"`
-	CollaborateurRefer uint   `json:"-" diff:"-"`
+	gorm.Model         `diff:"-"`
+	CollaborateurRefer uint   `diff:"-"`
 	Collaborateur      string `json:"collaborateur" diff:"Collaborateur,identifier"`
 }
 
@@ -58,8 +64,8 @@ type ActivitesHandler struct {
 }
 
 type Activite struct {
-	gorm.Model               `json:"-" diff:"-"`
-	ActiviteRefer            uint      `json:"-" diff:"-"`
+	gorm.Model               `diff:"-"`
+	ActiviteRefer            uint      `diff:"-"`
 	DateDebut                time.Time `json:"date_debut" diff:"-"`
 	DateFin                  time.Time `json:"date_fin" diff:"-"`
 	NumeroDeSemaine          uint      `json:"numero_de_semaine" diff:"NumeroDeSemaine,identifier"`
@@ -72,7 +78,7 @@ type Activite struct {
 }
 
 type Depute struct {
-	gorm.Model `json:"-" diff:"-"`
+	gorm.Model `diff:"-"`
 
 	// Fields from API
 	Nom                string `json:"nom"`
@@ -104,7 +110,7 @@ type Depute struct {
 	Collaborateurs []Collaborateur `json:"collaborateurs" gorm:"foreignkey:CollaborateurRefer"`
 	AnciensMandats []AncienMandat  `json:"anciens_mandats" gorm:"foreignkey:AncienMandatRefer"`
 	AutresMandats  []AutreMandat   `json:"autres_mandats" gorm:"foreignkey:AutreMandatRefer"`
-	Activites      []Activite      `json:"-" gorm:"foreignkey:ActiviteRefer"`
+	Activites      []Activite      `gorm:"foreignkey:ActiviteRefer"`
 
 	// Custom fields
 	EstEnMandat bool `json:"-"`
@@ -122,6 +128,7 @@ func MergeDeputies(deputyFromDB Depute, deputyFromAPI Depute) Depute {
 
 	// SitesWeb
 	for newSiteIdx := range newDeputy.Sites {
+		newDeputy.Sites[newSiteIdx].ID = 0
 		for dbSiteIdx := range deputyFromDB.Sites {
 			if newDeputy.Sites[newSiteIdx].Site == deputyFromDB.Sites[dbSiteIdx].Site {
 				newDeputy.Sites[newSiteIdx].ID = deputyFromDB.Sites[dbSiteIdx].ID
@@ -131,6 +138,7 @@ func MergeDeputies(deputyFromDB Depute, deputyFromAPI Depute) Depute {
 
 	// Emails
 	for newEmailIdx := range newDeputy.Emails {
+		newDeputy.Emails[newEmailIdx].ID = 0
 		for dbEmailIdx := range deputyFromDB.Emails {
 			if newDeputy.Emails[newEmailIdx].Email == deputyFromDB.Emails[dbEmailIdx].Email {
 				newDeputy.Emails[newEmailIdx].ID = deputyFromDB.Emails[dbEmailIdx].ID
@@ -140,6 +148,7 @@ func MergeDeputies(deputyFromDB Depute, deputyFromAPI Depute) Depute {
 
 	// Adresses
 	for newAdresseIdx := range newDeputy.Adresses {
+		newDeputy.Adresses[newAdresseIdx].ID = 0
 		for dbAdresseIdx := range deputyFromDB.Adresses {
 			if newDeputy.Adresses[newAdresseIdx].Adresse == deputyFromDB.Adresses[dbAdresseIdx].Adresse {
 				newDeputy.Adresses[newAdresseIdx].ID = deputyFromDB.Adresses[dbAdresseIdx].ID
@@ -149,6 +158,7 @@ func MergeDeputies(deputyFromDB Depute, deputyFromAPI Depute) Depute {
 
 	// Collaborateurs
 	for newCollaborateurIdx := range newDeputy.Collaborateurs {
+		newDeputy.Collaborateurs[newCollaborateurIdx].ID = 0
 		for dbCollaborateurIdx := range deputyFromDB.Collaborateurs {
 			if newDeputy.Collaborateurs[newCollaborateurIdx].Collaborateur == deputyFromDB.Collaborateurs[dbCollaborateurIdx].Collaborateur {
 				newDeputy.Collaborateurs[newCollaborateurIdx].ID = deputyFromDB.Collaborateurs[dbCollaborateurIdx].ID
@@ -158,6 +168,7 @@ func MergeDeputies(deputyFromDB Depute, deputyFromAPI Depute) Depute {
 
 	// AnciensMandats
 	for newAnciensMandatIdx := range newDeputy.AnciensMandats {
+		newDeputy.AnciensMandats[newAnciensMandatIdx].ID = 0
 		for dbAnciensMandatIdx := range deputyFromDB.AnciensMandats {
 			if newDeputy.AnciensMandats[newAnciensMandatIdx].AncienMandat == deputyFromDB.AnciensMandats[dbAnciensMandatIdx].AncienMandat {
 				newDeputy.AnciensMandats[newAnciensMandatIdx].ID = deputyFromDB.AnciensMandats[dbAnciensMandatIdx].ID
@@ -167,6 +178,7 @@ func MergeDeputies(deputyFromDB Depute, deputyFromAPI Depute) Depute {
 
 	// AutresMandats
 	for newAutresMandatIdx := range newDeputy.AutresMandats {
+		newDeputy.AutresMandats[newAutresMandatIdx].ID = 0
 		for dbAutresMandatIdx := range deputyFromDB.AutresMandats {
 			if newDeputy.AutresMandats[newAutresMandatIdx].AutreMandat == deputyFromDB.AutresMandats[dbAutresMandatIdx].AutreMandat {
 				newDeputy.AutresMandats[newAutresMandatIdx].ID = deputyFromDB.AutresMandats[dbAutresMandatIdx].ID
@@ -176,6 +188,7 @@ func MergeDeputies(deputyFromDB Depute, deputyFromAPI Depute) Depute {
 
 	// Activites
 	for newActivitesIdx := range newDeputy.Activites {
+		newDeputy.Activites[newActivitesIdx].ID = 0
 		for dbActivitesIdx := range deputyFromDB.Activites {
 			if newDeputy.Activites[newActivitesIdx].NumeroDeSemaine == deputyFromDB.Activites[dbActivitesIdx].NumeroDeSemaine {
 				newDeputy.Activites[newActivitesIdx].ID = deputyFromDB.Activites[dbActivitesIdx].ID

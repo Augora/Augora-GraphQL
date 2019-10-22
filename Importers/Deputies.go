@@ -66,12 +66,12 @@ func getDeputies() []Models.Depute {
 func getDeputyActivities(slug string) []Models.Activite {
 	activitesResp, err := http.Get("https://www.nosdeputes.fr/" + slug + "/graphes/lastyear/total?questions=true&format=json")
 	if err != nil {
-		log.Println(err)
+		log.Fatalln(err)
 	}
 
 	bodyBytes, err := ioutil.ReadAll(activitesResp.Body)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatalln(err)
 	}
 
 	var activitesFromAPI map[string]interface{}
@@ -79,10 +79,16 @@ func getDeputyActivities(slug string) []Models.Activite {
 	mappedActivities := Maps.MapActivities(activitesFromAPI)
 
 	var activities Models.ActivitesHandler
-	json.NewDecoder(strings.NewReader(mappedActivities)).Decode(&activities)
+	err = json.NewDecoder(strings.NewReader(mappedActivities)).Decode(&activities)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	layoutISO := "2006-01-02"
-	t, _ := time.Parse(layoutISO, activities.DateFin)
+	t, err := time.Parse(layoutISO, activities.DateFin)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	for {
 		if t.Weekday() == 1 {
 			break
