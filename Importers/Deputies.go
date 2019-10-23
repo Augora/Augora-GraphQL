@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -106,8 +107,8 @@ func getDeputyActivities(slug string) []Models.Activite {
 	return activities.Data
 }
 
-func DiffFromDB(fromDB []Models.Depute, fromAPI []Models.Depute) []Models.DeputyDiff {
-	var res []Models.DeputyDiff
+func DiffFromDB(fromDB []Models.Depute, fromAPI []Models.Depute) []Models.GenericDiff {
+	var res []Models.GenericDiff
 
 	changelog, _ := diff.Diff(fromDB, fromAPI)
 	groupedDiff := make(map[string]diff.Changelog)
@@ -115,8 +116,12 @@ func DiffFromDB(fromDB []Models.Depute, fromAPI []Models.Depute) []Models.Deputy
 		groupedDiff[change.Path[0]] = append(groupedDiff[change.Path[0]], change)
 	}
 
+	jsonContent, _ := json.MarshalIndent(groupedDiff, "", "  ")
+	jsonString := string(jsonContent)
+	fmt.Println(jsonString)
+
 	for slug := range groupedDiff {
-		// changedGroup := groupedDiff[slug]
+		changedGroup := groupedDiff[slug]
 		var deputyInDB Models.Depute
 		foundDeputyInDB := false
 		for i := range fromDB {
@@ -138,15 +143,134 @@ func DiffFromDB(fromDB []Models.Depute, fromAPI []Models.Depute) []Models.Deputy
 				}
 			}
 			if foundDeputyInAPI {
+				// Delete fields
+				path := []string{slug, "Sites"}
+				for _, change := range changedGroup.Filter(path) {
+					var siteToDelete Models.Site
+					for _, s := range deputyInDB.Sites {
+						if s.Site == change.Path[2] {
+							siteToDelete = s
+						}
+					}
+					newDiff := Models.GenericDiff{
+						Operation: "Delete",
+						Item:      siteToDelete,
+					}
+					res = append(res, newDiff)
+				}
+
+				path = []string{slug, "Emails"}
+				for _, change := range changedGroup.Filter(path) {
+					var emailToDelete Models.Email
+					for _, e := range deputyInDB.Emails {
+						if e.Email == change.Path[2] {
+							emailToDelete = e
+						}
+					}
+					newDiff := Models.GenericDiff{
+						Operation: "Delete",
+						Item:      emailToDelete,
+					}
+					res = append(res, newDiff)
+				}
+
+				path = []string{slug, "Adresses"}
+				for _, change := range changedGroup.Filter(path) {
+					var adresseToDelete Models.Adresse
+					for _, a := range deputyInDB.Adresses {
+						if a.Adresse == change.Path[2] {
+							adresseToDelete = a
+						}
+					}
+					newDiff := Models.GenericDiff{
+						Operation: "Delete",
+						Item:      adresseToDelete,
+					}
+					res = append(res, newDiff)
+				}
+
+				path = []string{slug, "Collaborateurs"}
+				for _, change := range changedGroup.Filter(path) {
+					var collabToDelete Models.Collaborateur
+					for _, c := range deputyInDB.Collaborateurs {
+						if c.Collaborateur == change.Path[2] {
+							collabToDelete = c
+						}
+					}
+					newDiff := Models.GenericDiff{
+						Operation: "Delete",
+						Item:      collabToDelete,
+					}
+					res = append(res, newDiff)
+				}
+
+				path = []string{slug, "AnciensMandats"}
+				for _, change := range changedGroup.Filter(path) {
+					var ancienMandatToDelete Models.AncienMandat
+					for _, am := range deputyInDB.AnciensMandats {
+						if am.AncienMandat == change.Path[2] {
+							ancienMandatToDelete = am
+						}
+					}
+					newDiff := Models.GenericDiff{
+						Operation: "Delete",
+						Item:      ancienMandatToDelete,
+					}
+					res = append(res, newDiff)
+				}
+
+				path = []string{slug, "AutresMandats"}
+				for _, change := range changedGroup.Filter(path) {
+					var autreMandatToDelete Models.AutreMandat
+					for _, am := range deputyInDB.AutresMandats {
+						if am.AutreMandat == change.Path[2] {
+							autreMandatToDelete = am
+						}
+					}
+					newDiff := Models.GenericDiff{
+						Operation: "Delete",
+						Item:      autreMandatToDelete,
+					}
+					res = append(res, newDiff)
+				}
+
+				path = []string{slug, "Activites"}
+				for _, change := range changedGroup.Filter(path) {
+					var activiteToDelete Models.Activite
+					for _, a := range deputyInDB.Activites {
+						numSemaine, _ := strconv.ParseUint(change.Path[2], 10, 32)
+						var numSemaine32 uint
+						numSemaine32 = uint(numSemaine)
+						if a.NumeroDeSemaine == numSemaine32 {
+							activiteToDelete = a
+						}
+					}
+					newDiff := Models.GenericDiff{
+						Operation: "Delete",
+						Item:      activiteToDelete,
+					}
+					res = append(res, newDiff)
+				}
+
 				// Update
 				updatedDeputy := Models.MergeDeputies(deputyInDB, deputyInAPI)
-				newDiff := Models.DeputyDiff{
+				newDiff := Models.GenericDiff{
 					Operation: "Update",
-					Deputy:    updatedDeputy,
+					Item:      updatedDeputy,
 				}
 				res = append(res, newDiff)
 			} else {
-				// ToDo: Delete
+				// Delete Deputy
+				path := []string{slug, "Slug"}
+				for _, change := range changedGroup.Filter(path) {
+					if change.Type == "delete" {
+						newDiff := Models.GenericDiff{
+							Operation: "Delete",
+							Item:      deputyInDB,
+						}
+						res = append(res, newDiff)
+					}
+				}
 			}
 		} else {
 			// Create
@@ -158,9 +282,9 @@ func DiffFromDB(fromDB []Models.Depute, fromAPI []Models.Depute) []Models.Deputy
 					break
 				}
 			}
-			newDiff := Models.DeputyDiff{
+			newDiff := Models.GenericDiff{
 				Operation: "Create",
-				Deputy:    newDeputy,
+				Item:      newDeputy,
 			}
 			res = append(res, newDiff)
 		}
@@ -188,8 +312,10 @@ func ImportDeputies() {
 
 	deputies := getDeputies()
 	var deputiesInDB []Models.Depute
-	tx.Set("gorm:auto_preload", true).Find(&deputiesInDB)
-
+	errors := tx.Set("gorm:auto_preload", true).Find(&deputiesInDB).GetErrors()
+	for _, err := range errors {
+		fmt.Println(err)
+	}
 	diffs := DiffFromDB(deputiesInDB, deputies)
 	jsonContent, _ := json.MarshalIndent(diffs, "", "  ")
 	jsonString := string(jsonContent)
@@ -197,10 +323,13 @@ func ImportDeputies() {
 
 	for _, diff := range diffs {
 		if diff.Operation == "Create" {
-			tx.Create(diff.Deputy)
+			tx.Create(diff.Item)
 		}
 		if diff.Operation == "Update" {
-			tx.Save(diff.Deputy)
+			tx.Save(diff.Item)
+		}
+		if diff.Operation == "Delete" {
+			tx.Delete(diff.Item)
 		}
 	}
 

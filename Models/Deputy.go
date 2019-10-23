@@ -11,26 +11,26 @@ type Deputes struct {
 }
 
 type Site struct {
-	gorm.Model `diff:"-"`
-	SiteRefer  uint   `diff:"-"`
+	gorm.Model `json:"-" diff:"-"`
+	SiteRefer  uint   `json:"-" diff:"-"`
 	Site       string `json:"site" diff:"Site,identifier"`
 }
 
 type Email struct {
-	gorm.Model `diff:"-"`
-	EmailRefer uint   `diff:"-"`
+	gorm.Model `json:"-" diff:"-"`
+	EmailRefer uint   `json:"-" diff:"-"`
 	Email      string `json:"email" diff:"Email,identifier"`
 }
 
 type Adresse struct {
-	gorm.Model   `diff:"-"`
-	AdresseRefer uint   `diff:"-"`
+	gorm.Model   `json:"-" diff:"-"`
+	AdresseRefer uint   `json:"-" diff:"-"`
 	Adresse      string `json:"adresse" diff:"Adresse,identifier"`
 }
 
 type AncienMandat struct {
-	gorm.Model        `diff:"-"`
-	AncienMandatRefer uint      `diff:"-"`
+	gorm.Model        `json:"-" diff:"-"`
+	AncienMandatRefer uint      `json:"-" diff:"-"`
 	AncienMandat      string    `json:"mandat" diff:"AncienMandat,identifier"`
 	DateDebut         time.Time `diff:"-"`
 	DateFin           time.Time `diff:"-"`
@@ -38,8 +38,8 @@ type AncienMandat struct {
 }
 
 type AutreMandat struct {
-	gorm.Model       `diff:"-"`
-	AutreMandatRefer uint      `diff:"-"`
+	gorm.Model       `json:"-" diff:"-"`
+	AutreMandatRefer uint      `json:"-" diff:"-"`
 	AutreMandat      string    `json:"mandat" diff:"AutreMandat,identifier"`
 	DateDebut        time.Time `diff:"-"`
 	DateFin          time.Time `diff:"-"`
@@ -47,8 +47,8 @@ type AutreMandat struct {
 }
 
 type Collaborateur struct {
-	gorm.Model         `diff:"-"`
-	CollaborateurRefer uint   `diff:"-"`
+	gorm.Model         `json:"-" diff:"-"`
+	CollaborateurRefer uint   `json:"-" diff:"-"`
 	Collaborateur      string `json:"collaborateur" diff:"Collaborateur,identifier"`
 }
 
@@ -64,7 +64,7 @@ type ActivitesHandler struct {
 }
 
 type Activite struct {
-	gorm.Model               `diff:"-"`
+	gorm.Model               `json:"-" diff:"-"`
 	ActiviteRefer            uint      `diff:"-"`
 	DateDebut                time.Time `json:"date_debut" diff:"-"`
 	DateFin                  time.Time `json:"date_fin" diff:"-"`
@@ -110,15 +110,15 @@ type Depute struct {
 	Collaborateurs []Collaborateur `json:"collaborateurs" gorm:"foreignkey:CollaborateurRefer"`
 	AnciensMandats []AncienMandat  `json:"anciens_mandats" gorm:"foreignkey:AncienMandatRefer"`
 	AutresMandats  []AutreMandat   `json:"autres_mandats" gorm:"foreignkey:AutreMandatRefer"`
-	Activites      []Activite      `gorm:"foreignkey:ActiviteRefer"`
+	Activites      []Activite      `json:"-" gorm:"foreignkey:ActiviteRefer"`
 
 	// Custom fields
 	EstEnMandat bool `json:"-"`
 }
 
-type DeputyDiff struct {
+type GenericDiff struct {
 	Operation string
-	Deputy    Depute
+	Item      interface{}
 }
 
 func MergeDeputies(deputyFromDB Depute, deputyFromAPI Depute) Depute {

@@ -21,7 +21,8 @@ var _ = Describe("Deputy", func() {
 				res := DiffFromDB(fromDB, fromAPI)
 				Expect(len(res)).To(Equal(1))
 				Expect(res[0].Operation).To(Equal("Create"))
-				Expect(res[0].Deputy.Slug).To(Equal("lel"))
+				deputy := res[0].Item.(Models.Depute)
+				Expect(deputy.Slug).To(Equal("lel"))
 			})
 			It("should bring one diff that is an insert with mutiple fields", func() {
 				fromDB := []Models.Depute{}
@@ -63,8 +64,25 @@ var _ = Describe("Deputy", func() {
 				res := DiffFromDB(fromDB, fromAPI)
 				Expect(len(res)).To(Equal(1))
 				Expect(res[0].Operation).To(Equal("Update"))
-				Expect(res[0].Deputy.Slug).To(Equal("lel"))
-				Expect(res[0].Deputy.GroupeSigle).To(Equal("FI"))
+				deputy := res[0].Item.(Models.Depute)
+				Expect(deputy.Slug).To(Equal("lel"))
+				Expect(deputy.GroupeSigle).To(Equal("FI"))
+			})
+		})
+
+		Context("Deleting deputies in DB", func() {
+			It("Should bring one diff that is an update", func() {
+				fromDB := []Models.Depute{
+					{
+						Slug: "lel",
+					},
+				}
+				fromAPI := []Models.Depute{}
+				res := DiffFromDB(fromDB, fromAPI)
+				Expect(len(res)).To(Equal(1))
+				Expect(res[0].Operation).To(Equal("Delete"))
+				deputy := res[0].Item.(Models.Depute)
+				Expect(deputy.Slug).To(Equal("lel"))
 			})
 		})
 	})
