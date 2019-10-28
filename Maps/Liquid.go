@@ -1,7 +1,6 @@
 package Maps
 
 import (
-	// "fmt"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -16,9 +15,9 @@ func MapActivities(activities map[string]interface{}) string {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	// fmt.Println(string(template))
+	// log.Println(string(template))
 	out, err := engine.ParseAndRenderString(string(template), activities)
-	// fmt.Println(string(out))
+	// log.Println(string(out))
 	if err != nil {
 		log.Fatalln(err)
 	}

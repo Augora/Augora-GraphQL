@@ -2,7 +2,6 @@ package Importers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,7 +12,7 @@ import (
 
 	"github.com/Augora/Augora-GraphQL/Maps"
 	"github.com/Augora/Augora-GraphQL/Models"
-	"github.com/Augora/Augora-GraphQL/Utils"
+	"github.com/jinzhu/gorm"
 	"github.com/r3labs/diff"
 )
 
@@ -118,7 +117,7 @@ func DiffFromDB(fromDB []Models.Depute, fromAPI []Models.Depute) []Models.Generi
 
 	jsonContent, _ := json.MarshalIndent(groupedDiff, "", "  ")
 	jsonString := string(jsonContent)
-	fmt.Println(jsonString)
+	log.Println(jsonString)
 
 	for slug := range groupedDiff {
 		changedGroup := groupedDiff[slug]
@@ -307,10 +306,7 @@ func DiffFromDB(fromDB []Models.Depute, fromAPI []Models.Depute) []Models.Generi
 	return res
 }
 
-func ImportDeputies() {
-	db := Utils.GetDataBaseConnection()
-	defer db.Close()
-
+func ImportDeputies(db *gorm.DB) {
 	// Begin transation
 	tx := db.Begin()
 
@@ -324,17 +320,23 @@ func ImportDeputies() {
 	tx.AutoMigrate(&Models.AncienMandat{})
 	tx.AutoMigrate(&Models.Activite{})
 
+	// Get deputies from API
 	deputies := getDeputies()
+
+	// Get deputies from DB
 	var deputiesInDB []Models.Depute
 	errors := tx.Set("gorm:auto_preload", true).Find(&deputiesInDB).GetErrors()
 	for _, err := range errors {
-		fmt.Println(err)
+		log.Fatalln(err)
 	}
+
+	// Computing diffs
 	diffs := DiffFromDB(deputiesInDB, deputies)
 	jsonContent, _ := json.MarshalIndent(diffs, "", "  ")
 	jsonString := string(jsonContent)
-	fmt.Println(jsonString)
+	log.Println(jsonString)
 
+	// Making changes in DB
 	for _, diff := range diffs {
 		if diff.Operation == "Create" {
 			tx.Create(diff.Item)

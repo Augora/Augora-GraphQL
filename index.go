@@ -7,11 +7,15 @@ import (
 	"github.com/Augora/Augora-GraphQL/Handler"
 	"github.com/Augora/Augora-GraphQL/Handler/Rest"
 	"github.com/Augora/Augora-GraphQL/Importers"
+	"github.com/Augora/Augora-GraphQL/Utils"
 )
 
 func main() {
 	if os.Getenv("IMPORT") == "True" || true {
-		Importers.ImportDeputies()
+		db := Utils.GetDataBaseConnection()
+		defer db.Close()
+
+		Importers.ImportDeputies(db)
 		// Importers.ImportFiles()
 	} else {
 		http.HandleFunc("/graphql", Handler.GraphQLHTTPHandler)
