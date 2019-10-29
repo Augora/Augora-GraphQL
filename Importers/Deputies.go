@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -12,30 +11,32 @@ import (
 
 	"github.com/Augora/Augora-GraphQL/Maps"
 	"github.com/Augora/Augora-GraphQL/Models"
+	"github.com/Augora/Augora-GraphQL/Utils"
 	"github.com/jinzhu/gorm"
 	"github.com/r3labs/diff"
 )
 
 func getDeputies() []Models.Depute {
+	httpClient := Utils.GetNosDeputesHTTPClient()
 	log.Println("Getting deputies...")
-	deputesResp, err := http.Get("https://www.nosdeputes.fr/deputes/json")
+	deputesResp, err := httpClient.R().Get("/deputes/json")
 	if err != nil {
 		log.Fatalln(err)
 	}
 	log.Println("Deputies received!")
 
 	log.Println("Getting in office...")
-	deputesEnMandatResp, err := http.Get("https://www.nosdeputes.fr/deputes/enmandat/json")
+	deputesEnMandatResp, err := httpClient.R().Get("/deputes/enmandat/json")
 	if err != nil {
 		log.Fatalln(err)
 	}
 	log.Println("Deputies in office received!")
 
 	var deputes Models.Deputes
-	json.NewDecoder(deputesResp.Body).Decode(&deputes)
+	json.NewDecoder(deputesResp.RawBody()).Decode(&deputes)
 
 	var deputesEnMandat Models.Deputes
-	json.NewDecoder(deputesEnMandatResp.Body).Decode(&deputesEnMandat)
+	json.NewDecoder(deputesEnMandatResp.RawBody()).Decode(&deputesEnMandat)
 
 	database := os.Getenv("BACKEND_SQL_DATABASE")
 	if database == "sandbox-db" {
@@ -64,12 +65,13 @@ func getDeputies() []Models.Depute {
 }
 
 func getDeputyActivities(slug string) []Models.Activite {
-	activitesResp, err := http.Get("https://www.nosdeputes.fr/" + slug + "/graphes/lastyear/total?questions=true&format=json")
+	httpClient := Utils.GetNosDeputesHTTPClient()
+	activitesResp, err := httpClient.R().Get("/" + slug + "/graphes/lastyear/total?questions=true&format=json")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	bodyBytes, err := ioutil.ReadAll(activitesResp.Body)
+	bodyBytes, err := ioutil.ReadAll(activitesResp.RawBody())
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -308,17 +310,20 @@ func DiffFromDB(fromDB []Models.Depute, fromAPI []Models.Depute) []Models.Generi
 
 func ImportDeputies(db *gorm.DB) {
 	// Begin transation
+	log.Println("Beginning transaction...")
 	tx := db.Begin()
 
 	// Loading database models
-	tx.AutoMigrate(&Models.Depute{})
-	tx.AutoMigrate(&Models.Site{})
-	tx.AutoMigrate(&Models.Email{})
-	tx.AutoMigrate(&Models.Adresse{})
-	tx.AutoMigrate(&Models.Collaborateur{})
-	tx.AutoMigrate(&Models.AutreMandat{})
-	tx.AutoMigrate(&Models.AncienMandat{})
-	tx.AutoMigrate(&Models.Activite{})
+	// log.Println("Migrating tables...")
+	// tx.AutoMigrate(&Models.Depute{})
+	// tx.AutoMigrate(&Models.Site{})
+	// tx.AutoMigrate(&Models.Email{})
+	// tx.AutoMigrate(&Models.Adresse{})
+	// tx.AutoMigrate(&Models.Collaborateur{})
+	// tx.AutoMigrate(&Models.AutreMandat{})
+	// tx.AutoMigrate(&Models.AncienMandat{})
+	// tx.AutoMigrate(&Models.Activite{})
+	// log.Println("Tables migrated.")
 
 	// Get deputies from API
 	deputies := getDeputies()
@@ -332,9 +337,9 @@ func ImportDeputies(db *gorm.DB) {
 
 	// Computing diffs
 	diffs := DiffFromDB(deputiesInDB, deputies)
-	jsonContent, _ := json.MarshalIndent(diffs, "", "  ")
-	jsonString := string(jsonContent)
-	log.Println(jsonString)
+	// jsonContent, _ := json.MarshalIndent(diffs, "", "  ")
+	// jsonString := string(jsonContent)
+	// log.Println(jsonString)
 
 	// Making changes in DB
 	for _, diff := range diffs {
