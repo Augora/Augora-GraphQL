@@ -9,7 +9,7 @@ require (
 	github.com/graphql-go/graphql v0.7.8 // indirect
 	github.com/jinzhu/gorm v1.9.11
 	github.com/onsi/ginkgo v1.10.3
-	github.com/onsi/gomega v1.7.0
+	github.com/onsi/gomega v1.7.1
 	github.com/osteele/liquid v1.2.4
 	github.com/osteele/tuesday v1.0.3 // indirect
 	github.com/r3labs/diff v0.0.0-20190801153147-a71de73c46ad
