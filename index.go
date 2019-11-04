@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"os"
 
@@ -17,10 +18,12 @@ func main() {
 
 		Importers.ImportDeputies(db)
 		// Importers.ImportFiles()
+		log.Println("Import finished")
 	} else {
 		http.HandleFunc("/graphql", Handler.GraphQLHTTPHandler)
 		http.HandleFunc("/deputes", Rest.DeputiesHandler)
 		http.HandleFunc("/deputesenmandat", Rest.DeputiesInOfficeHandler)
 		http.ListenAndServe(":3030", nil)
+		log.Println("Listening on http://localhost:3030")
 	}
 }

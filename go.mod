@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/denisenkom/go-mssqldb v0.0.0-20190806190131-db2462fef53b
+	github.com/go-resty/resty/v2 v2.1.0
 	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/gorilla/websocket v1.4.1 // indirect
 	github.com/graphql-go/graphql v0.7.8 // indirect

@@ -32,18 +32,18 @@ type AncienMandat struct {
 	gorm.Model        `json:"-" diff:"-"`
 	AncienMandatRefer uint      `json:"-" diff:"-"`
 	AncienMandat      string    `json:"mandat" diff:"AncienMandat,identifier"`
-	DateDebut         time.Time `json:"date_debut"`
-	DateFin           time.Time `json:"date_fin"`
-	Intitule          string    `json:"intitule"`
+	DateDebut         time.Time `json:"date_debut" diff:"-"`
+	DateFin           time.Time `json:"date_fin" diff:"-"`
+	Intitule          string    `json:"intitule" diff:"-"`
 }
 
 type AutreMandat struct {
 	gorm.Model       `json:"-" diff:"-"`
 	AutreMandatRefer uint   `json:"-" diff:"-"`
 	AutreMandat      string `json:"mandat" diff:"AutreMandat,identifier"`
-	Localite         string `json:"localite"`
-	Institution      string `json:"institution"`
-	Intitule         string `json:"intitule"`
+	Localite         string `json:"localite" diff:"-"`
+	Institution      string `json:"institution" diff:"-"`
+	Intitule         string `json:"intitule" diff:"-"`
 }
 
 type Collaborateur struct {
