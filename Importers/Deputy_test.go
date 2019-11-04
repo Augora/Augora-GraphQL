@@ -1,6 +1,8 @@
 package Importers_test
 
 import (
+	"time"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -267,6 +269,104 @@ var _ = Describe("Deputy", func() {
 				Expect(activite.Vacances).To(Equal(uint(5)))
 				deputy := res[1].Item.(Models.Depute)
 				Expect(deputy.Slug).To(Equal("lel"))
+			})
+		})
+	})
+
+	Describe("Test activites processing", func() {
+		Context("Date processing", func() {
+			It("Only one activity with an end date on a Monday", func() {
+				activityHandler := Models.ActivitesHandler{
+					DateDebut:     "2019-01-01",
+					DateDebutParl: "2019-01-01",
+					DateFin:       "2019-10-01",
+					Data: []Models.Activite{
+						{
+							NumeroDeSemaine:          1,
+							PresencesCommission:      2,
+							PresencesHemicycle:       3,
+							ParticipationsCommission: 4,
+							ParticipationsHemicycle:  5,
+							Questions:                6,
+							Vacances:                 7,
+						},
+					},
+				}
+				processedActivities := ProccessActivitiesDates(activityHandler)
+				Expect(processedActivities.Data[0].DateDebut).To(Equal(time.Date(2018, time.September, 24, 0, 0, 0, 0, time.UTC)))
+				Expect(processedActivities.Data[0].DateFin).To(Equal(time.Date(2018, time.October, 1, 0, 0, 0, 0, time.UTC)))
+			})
+		})
+	})
+
+	Describe("Test mandat processing", func() {
+		Context("AutreMandat", func() {
+			It("One Mandat with all data", func() {
+				mandat := Models.AutreMandat{
+					AutreMandat: "Alfortville / Conseil municipal / membre",
+				}
+				newMandat := ProcessAutreMandat(mandat)
+				Expect(newMandat.Localite).To(Equal("Alfortville"))
+				Expect(newMandat.Institution).To(Equal("Conseil municipal"))
+				Expect(newMandat.Intitule).To(Equal("membre"))
+			})
+
+			It("One Mandat with partial data", func() {
+				mandat := Models.AutreMandat{
+					AutreMandat: "Alfortville /  / membre",
+				}
+				newMandat := ProcessAutreMandat(mandat)
+				Expect(newMandat.Localite).To(Equal("Alfortville"))
+				Expect(newMandat.Institution).To(Equal(""))
+				Expect(newMandat.Intitule).To(Equal("membre"))
+			})
+
+			It("Test the non-mutation of original object", func() {
+				mandat := Models.AutreMandat{
+					AutreMandat: "Alfortville / Conseil municipal / membre",
+				}
+				newMandat := ProcessAutreMandat(mandat)
+				Expect(newMandat.Localite).To(Equal("Alfortville"))
+				Expect(newMandat.Institution).To(Equal("Conseil municipal"))
+				Expect(newMandat.Intitule).To(Equal("membre"))
+				Expect(mandat.Localite).To(Equal(""))
+				Expect(mandat.Institution).To(Equal(""))
+				Expect(mandat.Intitule).To(Equal(""))
+			})
+		})
+
+		Context("AncienMandat", func() {
+			It("One Mandat with all data", func() {
+				mandat := Models.AncienMandat{
+					AncienMandat: "20/06/2007 / 19/06/2012 / fin de législature",
+				}
+				newMandat := ProcessAncienMandat(mandat)
+				Expect(newMandat.DateDebut).To(Equal(time.Date(2007, time.June, 20, 0, 0, 0, 0, time.UTC)))
+				Expect(newMandat.DateFin).To(Equal(time.Date(2012, time.June, 19, 0, 0, 0, 0, time.UTC)))
+				Expect(newMandat.Intitule).To(Equal("fin de législature"))
+			})
+
+			It("One Mandat with partial data", func() {
+				mandat := Models.AncienMandat{
+					AncienMandat: "20/06/2007 /  / ",
+				}
+				newMandat := ProcessAncienMandat(mandat)
+				Expect(newMandat.DateDebut).To(Equal(time.Date(2007, time.June, 20, 0, 0, 0, 0, time.UTC)))
+				Expect(newMandat.DateFin).To(Equal(time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)))
+				Expect(newMandat.Intitule).To(Equal(""))
+			})
+
+			It("Test the non-mutation of original object", func() {
+				mandat := Models.AncienMandat{
+					AncienMandat: "20/06/2007 / 19/06/2012 / fin de législature",
+				}
+				newMandat := ProcessAncienMandat(mandat)
+				Expect(newMandat.DateDebut).To(Equal(time.Date(2007, time.June, 20, 0, 0, 0, 0, time.UTC)))
+				Expect(newMandat.DateFin).To(Equal(time.Date(2012, time.June, 19, 0, 0, 0, 0, time.UTC)))
+				Expect(newMandat.Intitule).To(Equal("fin de législature"))
+				Expect(mandat.DateDebut).To(Equal(time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)))
+				Expect(mandat.DateFin).To(Equal(time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)))
+				Expect(mandat.Intitule).To(Equal(""))
 			})
 		})
 	})

@@ -16,7 +16,10 @@ func ActivitiesHandler(w http.ResponseWriter, r *http.Request) {
 
 	var depute Models.Depute
 	slug := r.URL.Query()["slug"][0]
-	queryResult := db.Preload("Activites").Where(&Models.Depute{Slug: slug}).Find(&depute)
+	queryResult := db.
+		Preload("Activites").
+		Where(&Models.Depute{Slug: slug}).
+		Find(&depute)
 	errors := queryResult.GetErrors()
 	var count int
 	queryResult.Count(&count)

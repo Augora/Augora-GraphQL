@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	if os.Getenv("IMPORT") == "True" || true {
+	if os.Getenv("IMPORT") == "True" {
 		db := Utils.GetDataBaseConnection()
 		defer db.Close()
 

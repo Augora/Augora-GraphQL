@@ -15,7 +15,14 @@ func DeputiesHandler(w http.ResponseWriter, r *http.Request) {
 	db := Utils.GetDataBaseConnection()
 
 	var deputes []Models.Depute
-	db.Preload("Sites").Preload("Emails").Preload("Adresses").Preload("Collaborateurs").Preload("AnciensMandats").Preload("AutresMandats").Find(&deputes)
+	db.
+		Preload("Sites").
+		Preload("Emails").
+		Preload("Adresses").
+		Preload("Collaborateurs").
+		Preload("AnciensMandats").
+		Preload("AutresMandats").
+		Find(&deputes)
 	res, _ := json.Marshal(deputes)
 	fmt.Fprintf(w, string(res))
 }
