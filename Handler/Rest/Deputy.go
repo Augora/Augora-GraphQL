@@ -16,7 +16,15 @@ func DeputyHandler(w http.ResponseWriter, r *http.Request) {
 
 	var depute Models.Depute
 	slug := r.URL.Query()["slug"][0]
-	queryResult := db.Preload("Sites").Preload("Emails").Preload("Adresses").Preload("Collaborateurs").Preload("AnciensMandats").Preload("AutresMandats").Where(&Models.Depute{Slug: slug}).Find(&depute)
+	queryResult := db.
+		Preload("Sites").
+		Preload("Emails").
+		Preload("Adresses").
+		Preload("Collaborateurs").
+		Preload("AnciensMandats").
+		Preload("AutresMandats").
+		Where(&Models.Depute{Slug: slug}).
+		Find(&depute)
 	errors := queryResult.GetErrors()
 	var count int
 	queryResult.Count(&count)
