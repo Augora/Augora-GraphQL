@@ -48,9 +48,14 @@ func getDeputies() []Models.Depute {
 		deputes.Deputes[deputeIndex].Depute.Activites = activities
 		log.Println(deputes.Deputes[deputeIndex].Depute.Slug + " received!")
 
+		log.Println("Processing " + deputes.Deputes[deputeIndex].Depute.Slug + " mandat...")
 		for mandatIndex := range deputes.Deputes[deputeIndex].Depute.AutresMandats {
 			deputes.Deputes[deputeIndex].Depute.AutresMandats[mandatIndex] = ProcessAutreMandat(deputes.Deputes[deputeIndex].Depute.AutresMandats[mandatIndex])
 		}
+		for mandatIndex := range deputes.Deputes[deputeIndex].Depute.AnciensMandats {
+			deputes.Deputes[deputeIndex].Depute.AnciensMandats[mandatIndex] = ProcessAncienMandat(deputes.Deputes[deputeIndex].Depute.AnciensMandats[mandatIndex])
+		}
+		log.Println(deputes.Deputes[deputeIndex].Depute.Slug + "mandat processed!")
 
 		for _, deputeEnMandat := range deputesEnMandat.Deputes {
 			if deputes.Deputes[deputeIndex].Depute.Slug == deputeEnMandat.Depute.Slug {

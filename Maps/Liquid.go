@@ -1,14 +1,14 @@
 package Maps
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"path/filepath"
-	"encoding/json"
 	"strings"
 
-	"github.com/osteele/liquid"
 	"github.com/Augora/Augora-GraphQL/Models"
+	"github.com/osteele/liquid"
 )
 
 func MapActivities(activities map[string]interface{}) Models.ActivitesHandler {
@@ -28,7 +28,7 @@ func MapActivities(activities map[string]interface{}) Models.ActivitesHandler {
 
 	// Decode activites string to Go Object
 	var activitiesHandler Models.ActivitesHandler
-	err = json.NewDecoder(strings.NewReader(mappedActivities)).Decode(&activities)
+	err = json.NewDecoder(strings.NewReader(mappedActivities)).Decode(&activitiesHandler)
 	if err != nil {
 		log.Fatalln(err)
 	}
