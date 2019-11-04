@@ -47,6 +47,11 @@ func getDeputies() []Models.Depute {
 		activities := getDeputyActivities(deputes.Deputes[deputeIndex].Depute.Slug)
 		deputes.Deputes[deputeIndex].Depute.Activites = activities
 		log.Println(deputes.Deputes[deputeIndex].Depute.Slug + " received!")
+
+		for mandatIndex := range deputes.Deputes[deputeIndex].Depute.AutresMandats {
+			deputes.Deputes[deputeIndex].Depute.AutresMandats[mandatIndex] = ProcessAutreMandat(deputes.Deputes[deputeIndex].Depute.AutresMandats[mandatIndex])
+		}
+
 		for _, deputeEnMandat := range deputesEnMandat.Deputes {
 			if deputes.Deputes[deputeIndex].Depute.Slug == deputeEnMandat.Depute.Slug {
 				deputes.Deputes[deputeIndex].Depute.EstEnMandat = true
@@ -64,31 +69,37 @@ func getDeputies() []Models.Depute {
 }
 
 func getDeputyActivities(slug string) []Models.Activite {
+	// Getting activities from API
 	activitesResp, err := http.Get("https://www.nosdeputes.fr/" + slug + "/graphes/lastyear/total?questions=true&format=json")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
+	// Reading body as a string
 	bodyBytes, err := ioutil.ReadAll(activitesResp.Body)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
+	// Mapping body to a generic object
 	var activitesFromAPI map[string]interface{}
 	json.Unmarshal(bodyBytes, &activitesFromAPI)
+
+	// Processing activities
 	mappedActivities := Maps.MapActivities(activitesFromAPI)
+	processedActivites := ProccessActivitiesDates(mappedActivities)
 
-	var activities Models.ActivitesHandler
-	err = json.NewDecoder(strings.NewReader(mappedActivities)).Decode(&activities)
+	return processedActivites.Data
+}
+
+func ProccessActivitiesDates(activities Models.ActivitesHandler) Models.ActivitesHandler {
+	// Parsing latest date
+	t, err := time.Parse("2006-01-02", activities.DateFin)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	layoutISO := "2006-01-02"
-	t, err := time.Parse(layoutISO, activities.DateFin)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	// Finding latest Monday
 	for {
 		if t.Weekday() == 1 {
 			break
@@ -96,6 +107,7 @@ func getDeputyActivities(slug string) []Models.Activite {
 		t = t.AddDate(0, 0, -1)
 	}
 
+	// Adding start and end date to activities
 	for i := range activities.Data {
 		newStartDate := t.AddDate(0, 0, (int)(-(54-activities.Data[i].NumeroDeSemaine)*7))
 		newEndDate := newStartDate.AddDate(0, 0, 7)
@@ -103,7 +115,51 @@ func getDeputyActivities(slug string) []Models.Activite {
 		activities.Data[i].DateFin = newEndDate
 	}
 
-	return activities.Data
+	return activities
+}
+
+func ProcessAutreMandat(mandat Models.AutreMandat) Models.AutreMandat {
+	newMandat := Models.AutreMandat{
+		AutreMandat: mandat.AutreMandat,
+	}
+	splittedString := strings.Split(mandat.AutreMandat, " / ")
+	if len(splittedString) == 3 {
+		newMandat.Localite = splittedString[0]
+		newMandat.Institution = splittedString[1]
+		newMandat.Intitule = splittedString[2]
+	} else {
+		log.Fatalln("Mandat is not in the right format")
+	}
+
+	return newMandat
+}
+
+func ProcessAncienMandat(mandat Models.AncienMandat) Models.AncienMandat {
+	newMandat := Models.AncienMandat{
+		AncienMandat: mandat.AncienMandat,
+	}
+	splittedString := strings.Split(mandat.AncienMandat, " / ")
+	if len(splittedString) == 3 {
+		if len(splittedString[0]) > 0 {
+			t, err := time.Parse("02/01/2006", splittedString[0])
+			if err != nil {
+				log.Fatalln(err)
+			}
+			newMandat.DateDebut = t
+		}
+		if len(splittedString[1]) > 0 {
+			t, err := time.Parse("02/01/2006", splittedString[1])
+			if err != nil {
+				log.Fatalln(err)
+			}
+			newMandat.DateFin = t
+		}
+		newMandat.Intitule = splittedString[2]
+	} else {
+		log.Fatalln("Mandat is not in the right format")
+	}
+
+	return newMandat
 }
 
 func DiffFromDB(fromDB []Models.Depute, fromAPI []Models.Depute) []Models.GenericDiff {

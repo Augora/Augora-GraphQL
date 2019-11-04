@@ -41,9 +41,9 @@ type AutreMandat struct {
 	gorm.Model       `json:"-" diff:"-"`
 	AutreMandatRefer uint      `json:"-" diff:"-"`
 	AutreMandat      string    `json:"mandat" diff:"AutreMandat,identifier"`
-	DateDebut        time.Time `diff:"-"`
-	DateFin          time.Time `diff:"-"`
-	Intitule         string    `diff:"-"`
+	Localite         string    `json:"localite"`
+	Institution      string    `json:"institution"`
+	Intitule         string    `json:"intitule"`
 }
 
 type Collaborateur struct {

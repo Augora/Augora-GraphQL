@@ -4,7 +4,7 @@
   "date_fin": "{{ date_fin }}",
   "data": [
     {% for week in (1..54) %}
-      {% capture weekAsString %}{{ week }}{% endcapture  %}
+      {% capture weekAsString %}{{ week }}{% endcapture %}
       {
         "numero_de_semaine": {{ week }},
         "presences_commission": {{ n_presences.commission[weekAsString] | round | default: 0 }},
